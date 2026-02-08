@@ -1,0 +1,21 @@
+{
+  "name": "chatfish-seed",
+  "version": "1.0.0",
+  "description": "MongoDB seed script voor Chatfish database met Nederlandse test data",
+  "main": "seed-mongodb.js",
+  "scripts": {
+    "seed": "node seed-mongodb.js"
+  },
+  "keywords": [
+    "mongodb",
+    "seed",
+    "chatfish"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "mongodb": "^6.3.0",
+    "bcrypt": "^5.1.1",
+    "minio": "^7.1.3"
+  }
+}
