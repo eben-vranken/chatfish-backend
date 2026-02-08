@@ -8,44 +8,10 @@ Zorg dat je hebt geïnstalleerd:
 - **Docker Desktop** (of Docker + Docker Compose)
 - Een teksteditor (bijvoorbeeld Notepad, VS Code, of nano)
 
-## Stap 2: Maak een .env bestand aan
-
-1. Ga naar de `back-end-team10` map
-2. Maak een nieuw bestand aan met de naam `.env` (let op: begin met een punt!)
-3. Kopieer de onderstaande inhoud naar dit bestand:
-
-```env
-MINIO_ENDPOINT=minio:9000
-MINIO_AK=minioadmin
-MINIO_SK=minioadmin
-MINIO_ROOT_USER=minioadmin
-MINIO_ROOT_PASSWORD=minioadmin
-
-JWT_AUTHORITY=http://localhost:8080
-JWT_AUDIENCE=chatfish-api
-JWT_SECRET=verander-dit-in-production
-
-CORS_ALLOWED_ORIGINS=http://localhost:3000
-
-VAPID_SUBJECT=mailto:admin@chatfish.com
-VAPID_PUBLIC_KEY=verander-dit-in-production
-VAPID_PRIVATE_KEY=verander-dit-in-production
-
-ChatfishDatabase__ConnectionString=mongodb://mongodb:27017
-
-ASPNETCORE_ENVIRONMENT=Development
-
-NEXT_PUBLIC_API_URL=http://localhost:8080
-```
-
-4. Sla het bestand op
-
-**Tip**: Voor productie gebruik, verander de waarden die "verander-dit-in-production" bevatten naar veilige wachtwoorden en keys.
-
-## Stap 3: Start de applicatie
+## Stap 2: Start de applicatie
 
 1. Open een terminal/command prompt
-2. Ga naar de `back-end-team10` map
+2. Ga naar de deze map (= de map waarin dit README.md bestand zit)
 3. Typ het volgende commando:
 
 ```bash
@@ -65,7 +31,14 @@ docker compose ps
 
 Alle services moeten "Up" tonen.
 
-## Stap 4: Vul de database met testdata
+> Als je een ```failed to solve: mcr.microsoft.com/dotnet/aspnet:9.0:``` foutmelding krijgt heeft dat allicht te maken met een DNS/IPv6 adres issues. Je kan daarrond werken door eerst het IPv4 adres van ```mcr.microsoft.com``` op te halen. Dat doe je met ```nslookup mcr.microsoft.com```. Allicht krijg je meerdere adressen te zien (vb. ```150.171.70.10```). Dat adress voeg je toe in het ```C:\Windows\System32\drivers\etc\hosts``` bestand:  
+```
+...
+150.171.70.10 mcr.microsoft.com
+...
+```
+
+## Stap 3: Vul de database met testdata
 
 Als je de applicatie voor het eerst opstart, is de database leeg. Je kunt deze vullen met testdata:
 
@@ -99,12 +72,12 @@ Na het seeden zijn de volgende test gebruikers beschikbaar:
 - Wachtwoord: `wachtwoord123`
 - Rol: User
 
-## Stap 5: Gebruik de applicatie
+## Stap 4: Gebruik de applicatie
 
 Na het opstarten zijn de volgende services beschikbaar:
 
-- **Frontend**: http://localhost:3000
 - **Backend API**: http://localhost:8080
+  - Swagger: http://localhost:8080/swagger
 - **MinIO Console**: http://localhost:9001
   - Gebruikersnaam: `minioadmin`
   - Wachtwoord: `minioadmin`
@@ -139,7 +112,7 @@ Druk op `Ctrl+C` om de logs te stoppen.
 docker compose restart backend
 ```
 
-Vervang `backend` door `frontend`, `mongodb`, of `minio` om andere services te herstarten.
+Vervang `backend`, `mongodb`, of `minio` om andere services te herstarten.
 
 ## Problemen oplossen
 
@@ -165,6 +138,5 @@ De applicatie bestaat uit 4 services:
 - **MongoDB**: Database (poort 27017)
 - **MinIO**: Bestandsopslag (poorten 9000 en 9001)
 - **Backend**: .NET API (poort 8080)
-- **Frontend**: Next.js applicatie (poort 3000)
 
 Alle services communiceren via een intern Docker netwerk. De service namen (`mongodb`, `minio`, etc.) worden gebruikt voor interne communicatie.
