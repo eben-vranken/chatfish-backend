@@ -134,7 +134,7 @@ Als je een foutmelding krijgt dat een poort al in gebruik is:
 
 ## Technische details
 
-De applicatie bestaat uit 4 services:
+De applicatie bestaat uit 3 services:
 - **MongoDB**: Database (poort 27017)
 - **MinIO**: Bestandsopslag (poorten 9000 en 9001)
 - **Backend**: .NET API (poort 8080)
