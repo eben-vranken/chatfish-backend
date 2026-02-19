@@ -1,6 +1,6 @@
 # Docker Compose Setup - Stappenplan
 
-Dit document legt uit hoe je de Chatfish applicatie opstart met Docker Compose.
+Dit document legt uit hoe je de Chatfish backend opstart met Docker Compose.
 
 ## Stap 1: Vereisten
 
@@ -20,8 +20,8 @@ docker compose up -d
 
 Dit commando:
 - Downloadt alle benodigde images (als je ze nog niet hebt)
-- Bouwt de backend en frontend
-- Start alle services (MongoDB, MinIO, Backend, Frontend)
+- Bouwt de backend
+- Start alle services (MongoDB, MinIO, Backend)
 
 **Wacht even** tot alle containers gestart zijn. Je kunt de status controleren met:
 
