@@ -13,6 +13,19 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
-    - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag chatfish-backend:$(date +%s)
+    - name: Checkout repository
+      uses: actions/checkout@v4    
+      
+    - name: Log in to the Azure Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ucllfeg.azurecr.io
+        username: ${{ secrets.AZ_SP_CLIENT_ID }}
+        password: ${{ secrets.AZ_SP_CLIENT_SECRET }}
+
+    - name: Build the Docker image    
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        push: true
+        tags: chatfish-backend:$(date +%s)
