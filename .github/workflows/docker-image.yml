@@ -27,4 +27,4 @@ jobs:
       with:
         context: .
         push: true
-        tags: chatfish-backend:$(date +%s)
+        tags: chatfish-backend:latest
