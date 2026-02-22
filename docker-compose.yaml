@@ -41,12 +41,12 @@ services:
       timeout: 20s
       retries: 3
 
-  chatfish-aspnet:
+  chatfish-api:
     build:
       context: .
       dockerfile: Dockerfile
       network: host
-    container_name: chatfish-aspnet
+    container_name: chatfish-api
     ports:
       - "8080:8080"
     depends_on:
