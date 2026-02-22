@@ -1,6 +1,6 @@
 # Docker Compose Setup - Stappenplan
 
-Dit document legt uit hoe je de Chatfish backend opstart met Docker Compose.
+Dit deel legt uit hoe je de Chatfish backend lokaal opstart met Docker Compose.
 
 ## Stap 1: Vereisten
 
@@ -44,8 +44,9 @@ Als je de applicatie voor het eerst opstart, is de database leeg. Je kunt deze v
 
 1. Typ het volgende commando in de terminal:
 
+
 ```bash
-docker compose exec backend bash /app/seed/seed.sh 'mongodb://mongodb:27017' 'ChatfishDb' 'minio:9000' 'minioadmin' 'minioadmin'
+docker compose exec chatfish-aspnet bash /app/seed/seed.sh 'mongodb://chatfish-mongodb:27017' 'ChatfishDb' 'chatfish-minio:9000' 'minioadmin' 'minioadmin'
 ```
 
 2. Je krijgt een waarschuwing dat alle bestaande data verwijderd wordt
@@ -76,7 +77,7 @@ Na het seeden zijn de volgende test gebruikers beschikbaar:
 
 Na het opstarten zijn de volgende services beschikbaar:
 
-- **Backend API**: http://localhost:8080
+- **ASP.NET API**: http://localhost:8080
   - Swagger: http://localhost:8080/swagger
 - **MinIO Console**: http://localhost:9001
   - Gebruikersnaam: `minioadmin`
@@ -109,10 +110,10 @@ Druk op `Ctrl+C` om de logs te stoppen.
 ### Herstart een service
 
 ```bash
-docker compose restart backend
+docker compose restart chatfish-aspnet
 ```
 
-Vervang `backend`, `mongodb`, of `minio` om andere services te herstarten.
+Vervang `chatfish-aspnet` door `chatfish-mongodb`, of `chatfish-minio` om andere services te herstarten.
 
 ## Problemen oplossen
 
@@ -137,6 +138,160 @@ Als je een foutmelding krijgt dat een poort al in gebruik is:
 De applicatie bestaat uit 3 services:
 - **MongoDB**: Database (poort 27017)
 - **MinIO**: Bestandsopslag (poorten 9000 en 9001)
-- **Backend**: .NET API (poort 8080)
+- **ASP.NET Core**: .NET API (poort 8080)
 
-Alle services communiceren via een intern Docker netwerk. De service namen (`mongodb`, `minio`, etc.) worden gebruikt voor interne communicatie.
+Alle services communiceren via een intern Docker netwerk. De service namen (`cnatfish-mongodb`, `chatfish-minio`, etc.) worden gebruikt voor interne communicatie.
+
+# Azure setup - Stappenplan
+
+Dit deel legt uit hoe je de Chatfish backend éénmalig manueel configureert in Azure.  
+Let wel: dit is enkel bedoeld als dev-versie van de backend - is niet bedoeld als productieversie.
+Dit deel is optioneel.  
+
+## Stap 1: Vereisten
+
+Zorg dat je een Azure abonnement hebt waarmee je mistens 3 Container-apps kan aanmaken.
+
+## Stap 2: Resourcegroep aanmaken
+
+Maak een resourcegroep 'chatfish' aan, of andere naam moest deze al bestaan.
+
+## Stap 3: Maak een Container-app voor MongoDB
+
+### Rubriek: Basisinformatie
+  - Kies je abonnement en resourcegroep.
+  - **Naam van container-app**: chatfish-mongodb
+  - **Implementatiebron**: Containerinstallatiekopie
+  - **Regio**: West Europe
+  - **Container Apps-omgeving**: hier maak je een nieuwe 'chatfish' omgeving aan die je ook gaat hergebruiken voor de 2 andere app containers. Het is belangrijk dat alle containers apps in dezelfde omgeving draaien.
+
+Druk op 'Volgende'
+
+### Rubriek: Container
+  - **Naam**: chatfish-mongodb
+  - **Bron van installatiekopie**: Docker-hub of andere registers
+  - **Installatiekopietype**: Openbaar
+  - **Aanmeldingsserver voor register**: docker.io
+  - **Installatiekopie en tag**: mongo:7 (zie ook docker-compose.yml )
+  - **Opdracht overschrijven**: (leeglaten)
+  - **Argument overschrijven**: (leeglaten)
+  - **Ontwikkelingsstack**: Niet opgegeven
+  - **Workfloadprofiel**: (laagste profiel kiezen)
+  - **CPU en geheugen**: 0.5 CPU-kernen, 1 Gi-geheugen
+  - **Omgevingsvariabelen**
+    - **MONGO_INITDB_DATABASE**: ChatfishDb
+
+Druk op 'Volgende'
+
+### Rubriek: Inkomend
+  - **Inkomend**: (zet hier een vinkje)
+  - **Inkomend verkeer**: beperkt tot Container-Apps-omgeving.
+  - **Type inkomend verekeer**: TCP
+  - **Doelpoort**: 27017
+  - **Beschikbaar gemaakte poort**: 27017
+
+Druk op 'Beoordelen en maken'.  
+Normaal krijg je een 'Geslaagd' melding.  
+Druk uiteindelijk op 'Maken' - de app container wordt nu aangemaakt.
+
+## Stap 3: Maak een Container-app voor Minio
+
+### Rubriek: Basisinformatie
+  - Kies je abonnement en resourcegroep.
+  - **Naam van container-app**: chatfish-minio
+  - **Implementatiebron**: Containerinstallatiekopie
+  - **Regio**: West Europe
+  - **Container Apps-omgeving**: hier gebruik je de 'chatfish' omgeving die je in stap 2 hebt aangemaakt.
+
+Druk op 'Volgende'
+
+### Rubriek: Container
+  - **Naam**: chatfish-minio
+  - **Bron van installatiekopie**: Docker-hub of andere registers
+  - **Installatiekopietype**: Openbaar
+  - **Aanmeldingsserver voor register**: docker.io
+  - **Installatiekopie en tag**: minio/minio:latest (zie ook docker-compose.yml )
+  - **Opdracht overschrijven**: minio
+  - **Argument overschrijven**: server, /data
+  - **Ontwikkelingsstack**: Niet opgegeven
+  - **Workfloadprofiel**: (laagste profiel kiezen)
+  - **CPU en geheugen**: 0.5 CPU-kernen, 1 Gi-geheugen
+  - **Omgevingsvariabelen**
+    - **MINIO_ENDPOINT**: minio:9000
+    - **MINIO_AK**: minioadmin
+    - **MINIO_SK**: minioadmin
+    - **MINIO_USE_SSL**: false
+    - **MINIO_ROOT_USER**: minioadmin
+    - **MINIO_ROOT_PASSWORD**: minioadmin
+
+Druk op 'Volgende'
+
+### Rubriek: Inkomend
+  - **Inkomend**: (zet hier een vinkje)
+  - **Inkomend verkeer**: beperkt tot Container-Apps-omgeving.
+  - **Type inkomend verekeer**: TCP
+  - **Doelpoort**: 9000
+  - **Beschikbaar gemaakte poort**: 9000
+  - **Extra TCP-poorten**
+    - Doelpoort: 9001
+    - Beschikbaar gemaakte poort: 9001
+
+Druk op 'Beoordelen en maken'.  
+Normaal krijg je een 'Geslaagd' melding.  
+Druk uiteindelijk op 'Maken' - de app container wordt nu aangemaakt.
+
+## Stap 4: Maak een Container-app voor de ASP.NET Core API
+Dit is wat moeilijker omdat je je image moet builden en pushen naar een container images repository.
+Best maak je eerst een 'Container Registry' resource aan in je namespace.  
+Tip: bij 'Prijsplan' kies je voor 'Basis' ipv 'Standard'.
+
+### Rubriek: Basisinformatie
+  - Kies je abonnement en resourcegroep.
+  - **Naam van container-app**: chatfish-api
+  - **Implementatiebron**: Containerinstallatiekopie
+  - **Regio**: West Europe
+  - **Container Apps-omgeving**: hier gebruik je opnieuw de 'chatfish' omgeving die je in stap 2 hebt aangemaakt.
+
+Druk op 'Volgende'
+
+### Rubriek: Container
+  - **Naam**: chatfish-api
+  - **Bron van installatiekopie**: Azure Container-registry
+  - **Abonnement**: (kies je abonnement waar je je ACR hebt mee aangemaakt)
+  - **Register**: (kies je register, vb. mijnregister.azurecr.io)
+  - **Installatiekopie**: (kies je image)
+  - **Installatiekopietag**: latest
+  - **Verificatietype**: Geheimen (kan zijn dat je nu de user/paswoord van je container registry moet toevoegen)
+  - **Opdracht overschrijven**: (leeglaten)
+  - **Argument overschrijven**: (leeglaten)
+  - **Ontwikkelingsstack**: Niet opgegeven
+  - **Workfloadprofiel**: (laagste profiel kiezen)
+  - **CPU en geheugen**: 0.5 CPU-kernen, 1 Gi-geheugen
+  - **Omgevingsvariabelen**
+    - **MINIO_ENDPOINT**: chatfish-minio:9000
+    - **MINIO_AK**: minioadmin
+    - **MINIO_SK**: minioadmin
+    - **MINIO_USE_SSL**: false
+    - **JWT_AUTHORITY**: http://localhost:8080
+    - **JWT_AUDIENCE**: chatfish-api
+    - **JWT_SECRET**: verander-dit-in-production
+    - **CORS_ALLOWED_ORIGINS**: http://localhost:3000
+    - **VAPID_SUBJECT**: mailto:admin@chatfish.com
+    - **VAPID_PUBLIC_KEY**: verander-dit-in-production
+    - **VAPID_PRIVATE_KEY**: verander-dit-in-production
+    - **ASPNETCORE_ENVIRONMENT**: Development
+    - **ChatfishDatabase_ConnectionString**: mongodb://chatfish-mongodb:27017
+
+Druk op 'Volgende'
+
+### Rubriek: Inkomend
+  - **Inkomend**: (zet hier een vinkje)
+  - **Inkomend verkeer**: Verkeer vanaf elke locatie accepteren
+  - **Type inkomend verekeer**: HTTP
+  - **Doelpoort**: 8080
+  - **Beschikbaar gemaakte poort**: 8080
+
+
+Druk op 'Beoordelen en maken'.  
+Normaal krijg je een 'Geslaagd' melding.  
+Druk uiteindelijk op 'Maken' - de app container wordt nu aangemaakt.

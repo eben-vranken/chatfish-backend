@@ -1,15 +1,16 @@
 services:
-  mongodb:
+  chatfish-mongodb:
     image: mongo:7
     container_name: chatfish-mongodb
+    hostname: chatfish-mongodb
     ports:
       - "27017:27017"
     volumes:
-      - mongodb_data:/data/db
+      - chatfish_mongodb_data:/data/db
     environment:
       MONGO_INITDB_DATABASE: ChatfishDb
     networks:
-      - chatfish-network
+      - chatfish
     healthcheck:
       test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
       interval: 10s
@@ -17,14 +18,15 @@ services:
       retries: 5
       start_period: 10s
 
-  minio:
+  chatfish-minio:
     image: minio/minio:latest
     container_name: chatfish-minio
+    hostname: chatfish-minio
     ports:
       - "9000:9000"
       - "9001:9001"
     volumes:
-      - minio_data:/data
+      - chatfish_minio_data:/data
     env_file:
       - .env
     environment:
@@ -32,30 +34,30 @@ services:
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
     command: server /data --console-address ":9001"
     networks:
-      - chatfish-network
+      - chatfish
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
       interval: 30s
       timeout: 20s
       retries: 3
 
-  backend:
+  chatfish-aspnet:
     build:
       context: .
       dockerfile: Dockerfile
       network: host
-    container_name: chatfish-backend
+    container_name: chatfish-aspnet
     ports:
       - "8080:8080"
     depends_on:
-      mongodb:
+      chatfish-mongodb:
         condition: service_healthy
-      minio:
+      chatfish-minio:
         condition: service_healthy
     env_file:
       - .env
     environment:
-      - MINIO_ENDPOINT=${MINIO_ENDPOINT:-minio:9000}
+      - MINIO_ENDPOINT=${MINIO_ENDPOINT:-chatfish-minio:9000}
       - MINIO_AK=${MINIO_AK:-minioadmin}
       - MINIO_SK=${MINIO_SK:-minioadmin}
       - MINIO_USE_SSL=${MINIO_USE_SSL:-false}
@@ -67,16 +69,16 @@ services:
       - VAPID_PUBLIC_KEY=${VAPID_PUBLIC_KEY:-verander-dit-in-production}
       - VAPID_PRIVATE_KEY=${VAPID_PRIVATE_KEY:-verander-dit-in-production}
       - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT:-Development}
-      - ChatfishDatabase__ConnectionString=${ChatfishDatabase__ConnectionString:-mongodb://mongodb:27017}
+      - ChatfishDatabase__ConnectionString=${ChatfishDatabase__ConnectionString:-mongodb://chatfish-mongodb:27017}
     volumes:
       - ./appsettings.json:/app/appsettings.json:ro
     networks:
-      - chatfish-network
+      - chatfish
 
 volumes:
-  mongodb_data:
-  minio_data:
+  chatfish_mongodb_data:
+  chatfish_minio_data:
 
 networks:
-  chatfish-network:
+  chatfish:
     driver: bridge
