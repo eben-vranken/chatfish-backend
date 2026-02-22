@@ -1,10 +1,6 @@
 name: Docker Image CI
 
-on:
-  push:
-    branches: [ "feature/azure" ]
-  pull_request:
-    branches: [ "feature/azure" ]
+on: workflow_dispatch
 
 jobs:
 
