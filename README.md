@@ -264,7 +264,7 @@ Druk op 'Volgende'
   - **Verificatietype**: Geheimen (kan zijn dat je nu de user/paswoord van je container registry moet toevoegen)
   - **Opdracht overschrijven**: (leeglaten)
   - **Argument overschrijven**: (leeglaten)
-  - **Ontwikkelingsstack**: Niet opgegeven
+  - **Ontwikkelingsstack**: .NET
   - **Workfloadprofiel**: (laagste profiel kiezen)
   - **CPU en geheugen**: 0.5 CPU-kernen, 1 Gi-geheugen
   - **Omgevingsvariabelen**
@@ -288,10 +288,19 @@ Druk op 'Volgende'
   - **Inkomend**: (zet hier een vinkje)
   - **Inkomend verkeer**: Verkeer vanaf elke locatie accepteren
   - **Type inkomend verekeer**: HTTP
+  - **Transport**: Automatisch
+  - **Onveilige verbindingen**: (niet aanvinken)
   - **Doelpoort**: 8080
-  - **Beschikbaar gemaakte poort**: 8080
+  - **Sessie affiniteit**: (niet aanvinken)
 
 
 Druk op 'Beoordelen en maken'.  
 Normaal krijg je een 'Geslaagd' melding.  
 Druk uiteindelijk op 'Maken' - de app container wordt nu aangemaakt.
+
+## Stap 5: test data aanmaken (seeding)
+Ga naar de 'chatfish-api' resource en open een bash console (Controleren -> Console).
+- Navigeer naar /app/seed.  
+- Maak seed.sh uitvoerbaar: ```chmod u+r+x seed.sh```
+- Voeg het seed script uit. Normaal gezien kan je net dezelfde parameters gebruiken als de lokale uitvoering omdat we in de cloud dezelfde namen en poorten hebben gekozen: 
+```./seed.sh 'mongodb://chatfish-mongodb:27017' 'ChatfishDb' 'chatfish-minio:9000' 'minioadmin' 'minioadmin'```
