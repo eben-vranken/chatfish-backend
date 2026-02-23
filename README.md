@@ -46,7 +46,7 @@ Als je de applicatie voor het eerst opstart, is de database leeg. Je kunt deze v
 
 
 ```bash
-docker compose exec chatfish-aspnet bash /app/seed/seed.sh 'mongodb://chatfish-mongodb:27017' 'ChatfishDb' 'chatfish-minio:9000' 'minioadmin' 'minioadmin'
+docker compose exec chatfish-api bash /app/seed/seed.sh 'mongodb://chatfish-mongodb:27017' 'ChatfishDb' 'chatfish-minio:9000' 'minioadmin' 'minioadmin'
 ```
 
 2. Je krijgt een waarschuwing dat alle bestaande data verwijderd wordt
