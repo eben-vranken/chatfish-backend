@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChatFish Frontend-Backend Tester</title>
+    <script src="./index.js" type="module"></script>
+</head>
+<body>
+    <h1>ChatFish Frontend-Backend Tester</h1>
+    <select>
+        <option value="http://localhost:5127">Kestrel (HTTP) - via Chrome</option>
+        <option value="https://localhost:7210">Kestrel (HTTPS)</option>
+        <option value="http://localhost:8080" selected="selected">Docker Compose (HTTP) - via Chrome</option>
+        <option value="https://localhost:8081">Docker Compose (HTTPS) - Vereist registratie certificaat</option>
+        <option value="https://chatfish-api.politeriver-b2732744.westeurope.azurecontainerapps.io/">Azure (HTTPS)</option>
+    </select>
+    <button>Test</button>
+    <p></p>
+</body>
+</html>

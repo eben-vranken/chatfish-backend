@@ -20,11 +20,17 @@ builder.Services.AddCors(options =>
 {
     var allowedOrigins = EnvReader.GetStringValue("CORS_ALLOWED_ORIGINS")
         .Split(',', StringSplitOptions.RemoveEmptyEntries)
-        .Select(origin => origin.Trim());
+        .Select(origin => origin.Trim().ToLower());
 
     options.AddDefaultPolicy(policy =>
-        // policy.WithOrigins(allowedOrigins)
-        policy.SetIsOriginAllowed(origin => new Uri(origin).IsLoopback || allowedOrigins.Count(ao => origin.StartsWith(ao)) > 0)
+        policy.SetIsOriginAllowed(origin => 
+            { 
+                // In 'dev' omgevingen (lokaal, Docker compose of de Azure 'dev' versie) zijn alle origins toegelaten.
+                // In non-'dev' omgevingen (productie) is de lijst beperkt tot de opgegeven lijst.
+                return builder.Environment.IsDevelopment() 
+                       || 
+                       allowedOrigins.Any(ao => origin.ToLower().StartsWith(ao)); 
+            })
         .AllowAnyHeader()
         .AllowAnyMethod()
         .AllowCredentials());
@@ -142,7 +148,6 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 var app = builder.Build();
-app.UseCors();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -153,6 +158,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseRouting();
+app.UseCors();
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
