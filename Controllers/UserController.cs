@@ -57,8 +57,9 @@ public class UserController(IWebHostEnvironment environment, UserService userSer
         var cookieOptions = new CookieOptions
         {
             HttpOnly = true,
-            Secure = true, // Set to true in production, or when using HTTPS
+            Secure = true, // Sowieso verplicht bij SameSiteMode.None
             SameSite = environment.IsDevelopment() ? SameSiteMode.None : SameSiteMode.Strict, // Development: None zodat cookies ook worden meegestuurd wanneer de frontend op een andere (localhost) poort draait.
+            // Expires = DateTimeOffset.UtcNow.AddHours(24), -> Geen expiration = session cookie
         };
         
         Response.Cookies.Append("jwt", token, cookieOptions);

@@ -9,6 +9,7 @@ select.addEventListener("change", () => {
 button.addEventListener("click", async () => {
     let baseUrl = select.value;
     try {
+        // Inloggen: dit zorgt voor een SameSite=None cookie die we nodig hebben voor de volgende fetch
         let response = await fetch(`${baseUrl}/api/User/Login`,
             {
                 method: "POST",
@@ -18,10 +19,12 @@ button.addEventListener("click", async () => {
                 body: JSON.stringify({
                     "email": "admin@chatfish.be",
                     "password": "admin123"
-                })
+                }),
+                credentials: "include"
             }
         );
         if (response.ok) {
+            // Ophalen story messages.
             response = await fetch(`${baseUrl}/api/StoryMessage`, {
                 credentials: "include"
             });
