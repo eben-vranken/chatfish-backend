@@ -49,6 +49,7 @@ services:
     container_name: chatfish-api
     ports:
       - "8080:8080"
+      # - "8081:8081" #[SetUpHTTPS]
     depends_on:
       chatfish-mongodb:
         condition: service_healthy
@@ -70,8 +71,12 @@ services:
       - VAPID_PRIVATE_KEY=${VAPID_PRIVATE_KEY:-verander-dit-in-production}
       - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT:-Development}
       - ChatfishDatabase__ConnectionString=${ChatfishDatabase__ConnectionString:-mongodb://chatfish-mongodb:27017}
+      # - ASPNETCORE_URLS=http://+:8080;https://+:8081 #[SetUpHTTPS]
+      # - ASPNETCORE_Kestrel__Certificates__Default__Password=ChatFish4Development #[SetUpHTTPS]
+      # - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx #[SetUpHTTPS]
     volumes:
       - ./appsettings.json:/app/appsettings.json:ro
+      # - ~/.aspnet/https:/https:ro #[SetUpHTTPS]
     networks:
       - chatfish
 

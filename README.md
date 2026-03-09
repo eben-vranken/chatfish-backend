@@ -8,6 +8,17 @@ Zorg dat je hebt geïnstalleerd:
 - **Docker Desktop** (of Docker + Docker Compose)
 - Een teksteditor (bijvoorbeeld Notepad, VS Code, of nano)
 
+### Substap 1 bis: HTTPS instellen voor Docker (optioneel)
+Als je de backend wenst aan te bieden via HTTPS op Docker moet je volgend command uitvoeren:
+```
+dotnet dev-certs https -ep %USERPROFILE%\.aspnet\https\aspnetapp.pfx -p ChatFish4Development
+dotnet dev-certs https --trust
+```
+
+In ```docker-compose.yaml``` haal je vervolgens de lijnen met ```[SetUpHTTPS]``` uit commentaar.
+
+Meer informatie: [Hosting ASP.NET Core images with Docker Compose over HTTPS](https://learn.microsoft.com/en-us/aspnet/core/security/docker-compose-https?view=aspnetcore-10.0)
+
 ## Stap 2: Start de applicatie
 
 1. Open een terminal/command prompt
@@ -77,11 +88,18 @@ Na het seeden zijn de volgende test gebruikers beschikbaar:
 
 Na het opstarten zijn de volgende services beschikbaar:
 
-- **ASP.NET API**: http://localhost:8080
+- **ASP.NET API (http)**: http://localhost:8080
   - Swagger: http://localhost:8080/swagger
+- **ASP.NET API (https, als je stap 1.a hebt uitgevoerd)**: http://localhost:8081
+  - Swagger: http://localhost:8081/swagger
 - **MinIO Console**: http://localhost:9001
   - Gebruikersnaam: `minioadmin`
   - Wachtwoord: `minioadmin`
+
+### Substap 4 bis: test frontend (optioneel)
+Er is ook een ES6 mini-frontend om de login te testen. 
+Deze kan je terugvinden in ```/Tests/Frontend```.
+De ```index.html``` kan je openen met Live Server.
 
 ## Handige commando's
 
@@ -138,7 +156,7 @@ Als je een foutmelding krijgt dat een poort al in gebruik is:
 De applicatie bestaat uit 3 services:
 - **MongoDB**: Database (poort 27017)
 - **MinIO**: Bestandsopslag (poorten 9000 en 9001)
-- **ASP.NET Core**: .NET API (poort 8080)
+- **ASP.NET Core**: .NET API (HTTP: poort 8080, HTTPS: 8081)
 
 Alle services communiceren via een intern Docker netwerk. De service namen (`cnatfish-mongodb`, `chatfish-minio`, etc.) worden gebruikt voor interne communicatie.
 
