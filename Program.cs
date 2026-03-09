@@ -150,6 +150,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
+app.UseCors();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
@@ -158,7 +159,6 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseRouting();
-app.UseCors();
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();

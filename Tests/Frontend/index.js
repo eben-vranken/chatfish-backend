@@ -7,8 +7,9 @@ select.addEventListener("change", () => {
 });
 
 button.addEventListener("click", async () => {
+    let baseUrl = select.value;
     try {
-        let response = await fetch(`${select.value}/api/User/Login`,
+        let response = await fetch(`${baseUrl}/api/User/Login`,
             {
                 method: "POST",
                 headers: {
@@ -21,7 +22,7 @@ button.addEventListener("click", async () => {
             }
         );
         if (response.ok) {
-            response = await fetch(`${select.value}/api/StoryMessage`, {
+            response = await fetch(`${baseUrl}/api/StoryMessage`, {
                 credentials: "include"
             });
             if (response.ok) {
