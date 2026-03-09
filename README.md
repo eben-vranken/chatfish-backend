@@ -101,6 +101,28 @@ Er is ook een ES6 mini-frontend om de login te testen.
 Deze kan je terugvinden in ```/Tests/Frontend```.
 De ```index.html``` kan je openen met Live Server.
 
+#### Tip: Live Server onder HTTPS draaien
+Als je Live Server ook onder HTTPS wenst te draaien moet je het .pfx certificaat uit stap 1 bis uitpakken naar key.pem en cert.pem files.
+Lokaal onder HTTPS draaien is niet strict nodig, maar het kan zijn dat bepaalde browser features niet zullen werken als je onder HTTP draait (omwille van security vereisten).
+
+Live Server op HTTPS instellen doe je als volgt:
+1. Open een bash in je USER PROFILE/.aspnet/https directory. Dat is de directory waar je je certificaat van stap 1 bis hebt gezet.
+   Git Bash komt automatisch mee als je Git for Windows op je systeem hebt gezet. Zoek op "Git Bash" na installatie.
+2. ```openssl pkcs12 -in aspnetapp.pfx -nocerts -out key.pem -nodes```
+   Geef het paswoord in: ChatFish4Development
+3. ```openssl pkcs12 -in aspnetapp.pfx -clcerts -nokeys -out cert.pem```
+   Geef het paswoord in: ChatFish4Development
+4. Open VSCode en ga naar de Live Server settings, meer bepaald de "Settings: Https" rubriek.
+   - enable: true
+   - cert: full path naar je cert.pem file
+   - key: full path naar je cert.key file
+   - passphrase: mag je leeglaten.
+5. Sluit en open VSCode opnieuw: vanaf draait je Live Server onder https.
+   - Opgelet: mogelijks opent Live Server onder https://127.0.0.1 en krijg je de melding dat dat domein 'Not Secure' is.  
+     Dat moet je aanpassen naar https://localhost aangezien het certificaat voor dat 'domein' werd aangemaakt.
+
+Voor Angular-frontends verwijzen we naar de Angular documentatie.
+
 ## Handige commando's
 
 ### Stop de applicatie
