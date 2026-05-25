@@ -184,31 +184,35 @@ Alle services communiceren via een intern Docker netwerk. De service namen (`cna
 
 # Azure setup - Stappenplan
 
-Dit deel legt uit hoe je de Chatfish backend éénmalig manueel configureert in Azure.  
-Let wel: dit is enkel bedoeld als dev-versie van de backend - is niet bedoeld als productieversie.
-Dit deel is optioneel.  
+Dit deel legt uit hoe je de UnsentStories backend éénmalig manueel configureert in Azure.  
 
 ## Stap 1: Vereisten
 
-Zorg dat je een Azure abonnement hebt waarmee je mistens 3 Container-apps kan aanmaken.
+Zorg dat je een Azure abonnement hebt waarmee je mistens 3 Container-apps kan aanmaken:
+
+* Voor de dev versie van deze applicatie wordt het 'edu-gradprogrammeren-prod' abonnement gebruikt, meer bepaald voor de cursus FEG (frontend gevorderd). Alle resources werden aangemaaktin de 'FEG' resourcegroup. Daar wordt nog gebruik gemaakt van de 'oude' naam van het project, namelijk 'ChatFish'.
+* Voor de acceptatie/productie versie van deze applicatie werd door UCLL ICT op vrijdag 22/5/2026 het abonnement 'edu-unsentstories' aangemaakt. De resources worden aangemaakt in 'unsentstories', 'unsentstories-acc' en 'unsentstories-prod' resourcegroups.
 
 ## Stap 2: Resourcegroep aanmaken
 
-Maak een resourcegroep 'chatfish' aan, of andere naam moest deze al bestaan.
+Maak een resourcegroep 'unsentstories-[dev|acc|prod]' aan, of andere naam moest deze al bestaan.
+Maak ook een resourcesgroep 'unsentstories' voor omgevingsgedeelde resources zoals een container registry.
 
 ## Stap 3: Maak een Container-app voor MongoDB
 
+Alterntief: Cosmos DB (zie verder).
+
 ### Rubriek: Basisinformatie
   - Kies je abonnement en resourcegroep.
-  - **Naam van container-app**: chatfish-mongodb
+  - **Naam van container-app**: unsentstories-[dev|acc|prod]-mongodb
   - **Implementatiebron**: Containerinstallatiekopie
   - **Regio**: West Europe
-  - **Container Apps-omgeving**: hier maak je een nieuwe 'chatfish' omgeving aan die je ook gaat hergebruiken voor de 2 andere app containers. Het is belangrijk dat alle containers apps in dezelfde omgeving draaien.
+  - **Container Apps-omgeving**: hier maak je een nieuwe 'unsentstories-[dev|acc|prod]' omgeving aan die je ook gaat hergebruiken voor de 2 andere app containers. Het is belangrijk dat alle containers apps in dezelfde omgeving draaien.
 
 Druk op 'Volgende'
 
 ### Rubriek: Container
-  - **Naam**: chatfish-mongodb
+  - **Naam**: unsentstories-[dev|tst|prod]-mongodb
   - **Bron van installatiekopie**: Docker-hub of andere registers
   - **Installatiekopietype**: Openbaar
   - **Aanmeldingsserver voor register**: docker.io
@@ -234,19 +238,24 @@ Druk op 'Beoordelen en maken'.
 Normaal krijg je een 'Geslaagd' melding.  
 Druk uiteindelijk op 'Maken' - de app container wordt nu aangemaakt.
 
+### Alternatief: Cosmos DB
+Te bekijken.
+
 ## Stap 3: Maak een Container-app voor Minio
+
+Alternatief: Azure Blob Storage (zie verder).
 
 ### Rubriek: Basisinformatie
   - Kies je abonnement en resourcegroep.
-  - **Naam van container-app**: chatfish-minio
+  - **Naam van container-app**: unsentstories-[dev|acc|prod]-minio
   - **Implementatiebron**: Containerinstallatiekopie
   - **Regio**: West Europe
-  - **Container Apps-omgeving**: hier gebruik je de 'chatfish' omgeving die je in stap 2 hebt aangemaakt.
+  - **Container Apps-omgeving**: hier gebruik je de 'unsentstories-[dev|acc|prod]' omgeving die je in stap 2 hebt aangemaakt.
 
 Druk op 'Volgende'
 
 ### Rubriek: Container
-  - **Naam**: chatfish-minio
+  - **Naam**: unsentstories-[dev|acc|prod]-minio
   - **Bron van installatiekopie**: Docker-hub of andere registers
   - **Installatiekopietype**: Openbaar
   - **Aanmeldingsserver voor register**: docker.io
@@ -280,6 +289,9 @@ Druk op 'Beoordelen en maken'.
 Normaal krijg je een 'Geslaagd' melding.  
 Druk uiteindelijk op 'Maken' - de app container wordt nu aangemaakt.
 
+### Alternatief: Azure Blob Storage
+Te bekijken.
+
 ## Stap 4: Maak een Container-app voor de ASP.NET Core API
 Dit is wat moeilijker omdat je je image moet builden en pushen naar een container images repository.
 Best maak je eerst een 'Container Registry' resource aan in je namespace.  
@@ -287,15 +299,15 @@ Tip: bij 'Prijsplan' kies je voor 'Basis' ipv 'Standard'.
 
 ### Rubriek: Basisinformatie
   - Kies je abonnement en resourcegroep.
-  - **Naam van container-app**: chatfish-api
+  - **Naam van container-app**: unsentstories-[dev|acc|prod]-aspnet
   - **Implementatiebron**: Containerinstallatiekopie
   - **Regio**: West Europe
-  - **Container Apps-omgeving**: hier gebruik je opnieuw de 'chatfish' omgeving die je in stap 2 hebt aangemaakt.
+  - **Container Apps-omgeving**: hier gebruik je opnieuw de 'unsentstories-[dev|acc|prod]' omgeving die je in stap 2 hebt aangemaakt.
 
 Druk op 'Volgende'
 
 ### Rubriek: Container
-  - **Naam**: chatfish-api
+  - **Naam**: unsentstories-[dev|acc|prod]-aspnet
   - **Bron van installatiekopie**: Azure Container-registry
   - **Abonnement**: (kies je abonnement waar je je ACR hebt mee aangemaakt)
   - **Register**: (kies je register, vb. mijnregister.azurecr.io)
@@ -308,19 +320,19 @@ Druk op 'Volgende'
   - **Workfloadprofiel**: (laagste profiel kiezen)
   - **CPU en geheugen**: 0.5 CPU-kernen, 1 Gi-geheugen
   - **Omgevingsvariabelen**
-    - **MINIO_ENDPOINT**: chatfish-minio:9000
+    - **MINIO_ENDPOINT**: unsentstories[dev|acc|prod]-minio:9000
     - **MINIO_AK**: minioadmin
     - **MINIO_SK**: minioadmin
     - **MINIO_USE_SSL**: false
     - **JWT_AUTHORITY**: http://localhost:8080
-    - **JWT_AUDIENCE**: chatfish-api
+    - **JWT_AUDIENCE**: unsentstories-[dev|acc|prod]-api
     - **JWT_SECRET**: verander-dit-in-production
     - **CORS_ALLOWED_ORIGINS**: http://localhost:3000
-    - **VAPID_SUBJECT**: mailto:admin@chatfish.com
+    - **VAPID_SUBJECT**: mailto:admin@unsentstories.com
     - **VAPID_PUBLIC_KEY**: verander-dit-in-production
     - **VAPID_PRIVATE_KEY**: verander-dit-in-production
     - **ASPNETCORE_ENVIRONMENT**: Development
-    - **ChatfishDatabase_ConnectionString**: mongodb://chatfish-mongodb:27017
+    - **ChatfishDatabase_ConnectionString**: mongodb://unsentstories-[dev|acc|prod]-mongodb:27017
 
 Druk op 'Volgende'
 
@@ -339,8 +351,8 @@ Normaal krijg je een 'Geslaagd' melding.
 Druk uiteindelijk op 'Maken' - de app container wordt nu aangemaakt.
 
 ## Stap 5: test data aanmaken (seeding)
-Ga naar de 'chatfish-api' resource en open een bash console (Controleren -> Console).
+Ga naar de 'unsentstories-[dev|acc|prod]-aspnet' resource en open een bash console (Controleren -> Console).
 - Navigeer naar /app/seed.  
 - Maak seed.sh uitvoerbaar: ```chmod u+r+x seed.sh```
 - Voeg het seed script uit. Normaal gezien kan je net dezelfde parameters gebruiken als de lokale uitvoering omdat we in de cloud dezelfde namen en poorten hebben gekozen: 
-```./seed.sh 'mongodb://chatfish-mongodb:27017' 'ChatfishDb' 'chatfish-minio:9000' 'minioadmin' 'minioadmin'```
+```./seed.sh 'mongodb://unsentstories-[dev|acc|prod]-mongodb:27017' 'ChatfishDb' 'unsentstories-[dev|acc|prod]-minio:9000' 'minioadmin' 'minioadmin'```
