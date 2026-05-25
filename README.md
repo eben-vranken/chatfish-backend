@@ -337,7 +337,7 @@ Druk op 'Volgende'
     - **VAPID_PUBLIC_KEY**: verander-dit-in-production
     - **VAPID_PRIVATE_KEY**: verander-dit-in-production
     - **ASPNETCORE_ENVIRONMENT**: Development
-    - **ChatfishDatabase_ConnectionString**: mongodb://unsentstories-[dev|acc|prod]-mongodb:27017
+    - **ChatfishDatabase__ConnectionString**: mongodb://unsentstories-[dev|acc|prod]-mongodb:27017 (dubbele underscore __ tussen ChatfishDatabase en ConnectionString!!!)
 
 Druk op 'Volgende'
 
