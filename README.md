@@ -188,17 +188,19 @@ Dit deel legt uit hoe je de UnsentStories backend éénmalig manueel configureer
 
 ## Stap 1: Vereisten
 
-Zorg dat je een Azure abonnement hebt waarmee je mistens 3 Container-apps kan aanmaken:
+Zorg dat je een Azure abonnement hebt waarmee je minstens 1 of 3 (*) Container-apps kan aanmaken:
 
-* Voor de dev versie van deze applicatie wordt het 'edu-gradprogrammeren-prod' abonnement gebruikt, meer bepaald voor de cursus FEG (frontend gevorderd). Alle resources werden aangemaaktin de 'FEG' resourcegroup. Daar wordt nog gebruik gemaakt van de 'oude' naam van het project, namelijk 'ChatFish'.
+* Voor de dev versie van deze applicatie wordt het 'edu-gradprogrammeren-prod' abonnement gebruikt, meer bepaald voor de cursus FEG (frontend gevorderd). Alle resources werden aangemaakt in de 'FEG' resourcegroup. Daar wordt nog gebruik gemaakt van de 'oude' naam van het project, namelijk 'ChatFish'.
 * Voor de acceptatie/productie versie van deze applicatie werd door UCLL ICT op vrijdag 22/5/2026 het abonnement 'edu-unsentstories' aangemaakt. De resources worden aangemaakt in 'unsentstories', 'unsentstories-acc' en 'unsentstories-prod' resourcegroups.
+
+(*) Mogelijks zal er voor MinIO en MongoDB gekeken worden naar cloud alternatieven zoals Azure Blob Storage en Cosmos DB. In dat geval zijn er voor die services geen container apps nodig.
 
 ## Stap 2: Resourcegroep aanmaken
 
-Maak een resourcegroep 'unsentstories-[dev|acc|prod]' aan, of andere naam moest deze al bestaan.
-Maak ook een resourcesgroep 'unsentstories' voor omgevingsgedeelde resources zoals een container registry.
+Maak een resourcegroep 'unsentstories-[dev|acc|prod]' aan.
+Maak ook een resourcegroep 'unsentstories' voor omgevingsgedeelde resources zoals een container registry: zo kunnen images éénmaal opgeladen worden en desgewenst in verschillende omgevingen hergebruikt worden.
 
-## Stap 3: Maak een Container-app voor MongoDB
+## Stap 3: Maak een Container-app voor MongoDB OF gebruik Cosmos DB
 
 Alterntief: Cosmos DB (zie verder).
 
@@ -212,7 +214,7 @@ Alterntief: Cosmos DB (zie verder).
 Druk op 'Volgende'
 
 ### Rubriek: Container
-  - **Naam**: unsentstories-[dev|tst|prod]-mongodb
+  - **Naam**: unsentstories-[dev|acc|prod]-mongodb
   - **Bron van installatiekopie**: Docker-hub of andere registers
   - **Installatiekopietype**: Openbaar
   - **Aanmeldingsserver voor register**: docker.io
@@ -223,7 +225,7 @@ Druk op 'Volgende'
   - **Workfloadprofiel**: (laagste profiel kiezen)
   - **CPU en geheugen**: 0.5 CPU-kernen, 1 Gi-geheugen
   - **Omgevingsvariabelen**
-    - **MONGO_INITDB_DATABASE**: ChatfishDb
+    - **MONGO_INITDB_DATABASE**: ChatfishDb (hier werd de 'oude' naam behouden om niet teveel te breken met de bestaande code).
 
 Druk op 'Volgende'
 
@@ -241,9 +243,9 @@ Druk uiteindelijk op 'Maken' - de app container wordt nu aangemaakt.
 ### Alternatief: Cosmos DB
 Te bekijken.
 
-## Stap 3: Maak een Container-app voor Minio
+## Stap 3: Maak een Container-app voor Minio of gebruik Azure Blob Storage
 
-Alternatief: Azure Blob Storage (zie verder).
+Alternatief: Azure Blob Storage (zie verder) omdat MinIO niet meer gesupporteerd wordt.
 
 ### Rubriek: Basisinformatie
   - Kies je abonnement en resourcegroep.
@@ -270,8 +272,8 @@ Druk op 'Volgende'
     - **MINIO_AK**: minioadmin
     - **MINIO_SK**: minioadmin
     - **MINIO_USE_SSL**: false
-    - **MINIO_ROOT_USER**: minioadmin
-    - **MINIO_ROOT_PASSWORD**: minioadmin
+    - **MINIO_ROOT_USER**: minioadmin (verander dit in prod)
+    - **MINIO_ROOT_PASSWORD**: minioadmin (verander dit in prod)
 
 Druk op 'Volgende'
 
@@ -296,6 +298,9 @@ Te bekijken.
 Dit is wat moeilijker omdat je je image moet builden en pushen naar een container images repository.
 Best maak je eerst een 'Container Registry' resource aan in je namespace.  
 Tip: bij 'Prijsplan' kies je voor 'Basis' ipv 'Standard'.
+
+(!) Bij voorkeur wordt de frontend ook gebuild in deze image in een /wwwroot directory.
+Dit vereist wel het toevoegen van een StaticFiles middleware aan de ASP.NET Core toepassing.
 
 ### Rubriek: Basisinformatie
   - Kies je abonnement en resourcegroep.
