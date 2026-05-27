@@ -18,7 +18,7 @@ jobs:
         username: ${{ secrets.AZ_SP_CLIENT_ID }}
         password: ${{ secrets.AZ_SP_CLIENT_SECRET }}
 
-    - name: Build the Docker image    
+    - name: Build and push the Docker image as version ${{ vars.IMAGE_VERSION }} and latest
       uses: docker/build-push-action@v5
       with:
         context: .        
