@@ -23,4 +23,4 @@ jobs:
       with:
         context: .        
         push: true
-        tags: ${{ vars.IMAGE_REGISTRY }}/unsentstories/unsentstories-aspnet:latest
+        tags: ${{ vars.IMAGE_REGISTRY }}/unsentstories/unsentstories-aspnet:${{ vars.IMAGE_VERSION }} , ${{ vars.IMAGE_REGISTRY }}/unsentstories/unsentstories-aspnet:latest
