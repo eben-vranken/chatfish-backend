@@ -51,7 +51,13 @@ public class ScenarioService
         var newScenario = new Scenario(
             scenarioCreateRequest.Name,
             scenarioCreateRequest.Description,
-            scenarioCreateRequest.CreatedBy);
+            scenarioCreateRequest.CreatedBy)
+        {
+            StartMoment = scenarioCreateRequest.StartMoment,
+            DurationMinutes = scenarioCreateRequest.DurationMinutes,
+            Price = scenarioCreateRequest.Price,
+            SaleStatus = scenarioCreateRequest.SaleStatus,
+        };
         await _scenarioCollection.InsertOneAsync(newScenario);
         return newScenario;
     }

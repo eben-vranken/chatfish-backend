@@ -184,8 +184,8 @@ async function seedDatabase() {
     const scenarioBId = new ObjectId();
 
     const scenarios = [
-      { _id: scenarioAId, Name: "Verdwenen Student", Description: "Mysterie rond een verdwenen student", CreatedBy: users[0]._id },
-      { _id: scenarioBId, Name: "Blackout", Description: "Een stad zonder stroom en sabotage", CreatedBy: users[0]._id },
+      { _id: scenarioAId, Name: "Verdwenen Student", Description: "Mysterie rond een verdwenen student", CreatedBy: users[0]._id, StartMoment: new Date("2026-06-15T20:00:00Z"), DurationMinutes: 90, Price: 12.50, SaleStatus: "open" },
+      { _id: scenarioBId, Name: "Blackout", Description: "Een stad zonder stroom en sabotage", CreatedBy: users[0]._id, StartMoment: new Date("2026-07-20T19:30:00Z"), DurationMinutes: 120, Price: 15.00, SaleStatus: "gesloten" },
     ];
     await db.collection("Scenarios").insertMany(scenarios);
 

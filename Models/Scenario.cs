@@ -15,4 +15,14 @@ public class Scenario(string name, string description, string createdBy)
 
     [BsonRepresentation(BsonType.ObjectId)]
     public string CreatedBy { get; set; } = createdBy;
+
+    // Verkoop-/voorstellingsdetails (optioneel)
+    public DateTime? StartMoment { get; set; }
+
+    public int? DurationMinutes { get; set; }
+
+    public double? Price { get; set; }
+
+    // "open" | "gesloten" | "gestart" | "afgelopen"
+    public string? SaleStatus { get; set; }
 }

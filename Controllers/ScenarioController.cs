@@ -26,7 +26,11 @@ public class ScenarioController(ScenarioService scenarioService) : ControllerBas
         {
             Name = scenarioCreateRequest.Name,
             Description = scenarioCreateRequest.Description,
-            CreatedBy = userId
+            CreatedBy = userId,
+            StartMoment = scenarioCreateRequest.StartMoment,
+            DurationMinutes = scenarioCreateRequest.DurationMinutes,
+            Price = scenarioCreateRequest.Price,
+            SaleStatus = scenarioCreateRequest.SaleStatus
         });
         return CreatedAtAction(nameof(GetById), new { id = newScenario.ScenarioId }, newScenario);
     }
