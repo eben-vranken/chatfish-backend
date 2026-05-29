@@ -65,6 +65,7 @@ builder.Services.AddSingleton<StoryMessageService>();
 builder.Services.AddSingleton<CommentService>();
 builder.Services.AddSingleton<CharacterService>();
 builder.Services.AddSingleton<ScenarioService>();
+builder.Services.AddSingleton<TicketService>();
 builder.Services.AddSingleton<PushNotificationService>();
 builder.Services.AddSingleton<BackEnd.Services.WebSocketManager>();
 

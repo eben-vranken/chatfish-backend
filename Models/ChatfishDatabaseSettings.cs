@@ -23,4 +23,6 @@ public class ChatfishDatabaseSettings
     public string ScenariosCollectionName { get; set; } = null!;
     
     public string PushSubscriptionsCollectionName { get; set; } = null!;
+
+    public string TicketsCollectionName { get; set; } = "Tickets";
 }
