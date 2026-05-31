@@ -185,7 +185,8 @@ public class StoryMessageController(
     [HttpGet("chat/{chatId:length(24)}")]
     public async Task<ActionResult<List<StoryMessage>>> GetByChatId(string chatId)
     {
-        var messages = await storyMessageService.GetByChatId(chatId);
+        // Public endpoint: only return messages that have been sent (hide future/unsent messages)
+        var messages = await storyMessageService.GetSentByChatId(chatId);
 
         foreach (var msg in messages)
             await PopulateFileUrlAsync(msg);

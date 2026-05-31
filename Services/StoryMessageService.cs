@@ -82,6 +82,23 @@ public class StoryMessageService
             .ToListAsync();
     }
 
+    /// <summary>
+    /// Public-facing: only return messages that have been marked as sent.
+    /// Used by the frontend theatre chat so future/unsent messages are hidden.
+    /// </summary>
+    public async Task<List<StoryMessage>> GetSentByChatId(string chatId)
+    {
+        var filter = Builders<StoryMessage>.Filter.And(
+            Builders<StoryMessage>.Filter.Eq(m => m.ChatId, chatId),
+            Builders<StoryMessage>.Filter.Eq(m => m.Sent, true)
+        );
+
+        return await _storyMessagesCollection
+            .Find(filter)
+            .SortBy(m => m.PlannedAt)
+            .ToListAsync();
+    }
+
     public async Task<List<StoryMessage>> GetByChatIdSince(string chatId, DateTime since)
     {
         // Ensure the since date is in UTC

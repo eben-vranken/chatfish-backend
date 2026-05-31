@@ -168,6 +168,7 @@ async function seedDatabase() {
       "Posts",
       "Comments",
       "StoryMessages",
+      "Tickets",
     ];
     for (const c of collections) await db.collection(c).deleteMany({});
 
@@ -554,6 +555,24 @@ async function seedDatabase() {
     }
 
     await db.collection("Comments").insertMany(comments);
+
+    // Seed a ticket for a test user so developers can enter the waiting room
+    // Give the first non-admin user a ticket for Scenario C (past scenario)
+    try {
+      const testUser = nonAdminUsers[0];
+      if (testUser) {
+        const ticket = {
+          _id: new ObjectId(),
+          UserId: testUser._id,
+          ScenarioId: scenarioCId,
+          PurchasedAt: new Date(),
+        };
+        await db.collection("Tickets").insertOne(ticket);
+        console.log(`✅ Inserted test ticket for user ${testUser.Username}`);
+      }
+    } catch (e) {
+      console.warn("Could not insert test ticket:", e.message || e);
+    }
 
     console.log("✅ Database seeded successfully!");
   } catch (e) {
