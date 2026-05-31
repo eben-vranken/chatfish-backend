@@ -23,6 +23,7 @@ doen om de gevraagde **frontend**-userstories te kunnen realiseren.
 | *(commit hash)* | 2026-05-31 | US-29 (bericht verwijderen) | Soft-delete endpoint voor posts |
 | *(commit hash)* | 2026-05-31 | US-30 (bericht verbergen) | `IsHidden`-veld + hide-endpoint + filtering per rol |
 | *(commit hash)* | 2026-05-31 | US-31 (moderator waarschuwing) | `Warning`-model + endpoint + per-user WebSocket + push-notificatie |
+| *(commit hash)* | 2026-05-31 | US-32 (moderator time-out) | `UserTimeout`-model + endpoints + afdwinging in PostController |
 
 ---
 
@@ -137,6 +138,33 @@ doen om de gevraagde **frontend**-userstories te kunnen realiseren.
   (alleen moderator/admin), en real-time aflevering aan een specifieke gebruiker (per-user
   WebSocket-targeting en browser-push) zijn volledig server-side verantwoordelijkheden.
   De frontend kan niet zelf beslissen wie een waarschuwing mag sturen of wie hem ontvangt.
+
+## 8. `feat(timeout): time-out systeem voor moderators`
+
+- **Commit:** *(vul hash in na `git commit`)* — 2026-05-31
+- **Nodig voor:** US-32 (moderator geeft gebruiker een time-out)
+- **Wat ontbrak:** Er was geen concept van tijdelijke posteerverboden: geen model, geen
+  endpoint om een time-out op te leggen, en geen afdwinging in de post-endpoint zodat
+  een gebruiker met actieve time-out toch kon blijven posten.
+- **Wat we toevoegden:**
+  - `UserTimeout`-model (`TimeoutId`, `UserId`, `IssuedById`, `EndsAt`, `IssuedAt`) in
+    een eigen MongoDB-collectie (`Timeouts`).
+  - `POST /api/UserTimeout` — alleen moderator/admin; legt een time-out op voor de
+    opgegeven duur in minuten.
+  - `GET /api/UserTimeout/my` — geeft de actieve (nog niet verlopen) time-out van de
+    ingelogde gebruiker terug (204 als er geen is); gebruikt door de frontend om de
+    time-out-banner te tonen.
+  - `DELETE /api/UserTimeout/{userId}` — heft een actieve time-out vroegtijdig op
+    (moderator/admin).
+  - `UserTimeoutService.GetActive(userId)` — centrale helper die controleert of een
+    gebruiker een actieve time-out heeft op basis van `EndsAt > UtcNow`.
+  - `PostController.Add` en `PostController.Update` uitgebreid met een time-out-check:
+    bij een actieve time-out wordt HTTP 423 (Locked) teruggegeven met de `EndsAt`
+    timestamp, zodat de frontend de banner kan bijwerken.
+- **Waarom backend-domein:** Persistente time-out-records, tijdsgebonden autorisatie
+  (`EndsAt > UtcNow`) en afdwinging van het posteerverbod zijn volledig server-side
+  verantwoordelijkheden. De frontend kan niet zelf beslissen of iemand mag posten; dat
+  is precies wat autorisatie en persistente state op de server regelen.
 
 ---
 

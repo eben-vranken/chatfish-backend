@@ -27,4 +27,6 @@ public class ChatfishDatabaseSettings
     public string TicketsCollectionName { get; set; } = "Tickets";
 
     public string WarningsCollectionName { get; set; } = "Warnings";
+
+    public string TimeoutsCollectionName { get; set; } = "Timeouts";
 }
