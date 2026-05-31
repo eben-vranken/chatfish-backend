@@ -182,43 +182,57 @@ async function seedDatabase() {
 
     const scenarioAId = new ObjectId();
     const scenarioBId = new ObjectId();
+    const scenarioCId = new ObjectId();
 
     const scenarios = [
       { _id: scenarioAId, Name: "Verdwenen Student", Description: "Mysterie rond een verdwenen student", CreatedBy: users[0]._id, StartMoment: new Date("2026-06-15T20:00:00Z"), DurationMinutes: 90, Price: 12.50, SaleStatus: "open" },
       { _id: scenarioBId, Name: "Blackout", Description: "Een stad zonder stroom en sabotage", CreatedBy: users[0]._id, StartMoment: new Date("2026-07-20T19:30:00Z"), DurationMinutes: 120, Price: 15.00, SaleStatus: "gesloten" },
+      // Scenario C: startmoment in het verleden, zodat functionaliteit die afhankelijk is van een
+      // reeds gestart stuk (tijdlijn, automatische navigatie) getest kan worden.
+      { _id: scenarioCId, Name: "De Nacht van de Waarheid", Description: "Een groep vrienden ontdekt een schokkend geheim tijdens een reünie", CreatedBy: users[0]._id, StartMoment: new Date("2026-05-20T20:00:00Z"), DurationMinutes: 90, Price: 12.50, SaleStatus: "open" },
     ];
     await db.collection("Scenarios").insertMany(scenarios);
 
     const namesA = ["Anna Peeters", "Bram Claes", "Celine Jacobs", "David Maes"];
     const namesB = ["Eva Van den Berg", "Frank De Smet", "Gina Verhoeven", "Hugo Vandenbosch"];
+    const namesC = ["Lena Claes", "Niels Bogaert", "Sara Hermans", "Thomas Willems"];
     const charsA = [];
     const charsB = [];
+    const charsC = [];
     for (let i = 0; i < 4; i++) {
       const hashA = await uploadRandomImage(BUCKET_CHARACTERS);
       const hashB = await uploadRandomImage(BUCKET_CHARACTERS);
+      const hashC = await uploadRandomImage(BUCKET_CHARACTERS);
       charsA.push({ _id: new ObjectId(), Name: namesA[i], ScenarioId: scenarioAId, ProfilePicture: hashA });
       charsB.push({ _id: new ObjectId(), Name: namesB[i], ScenarioId: scenarioBId, ProfilePicture: hashB });
+      charsC.push({ _id: new ObjectId(), Name: namesC[i], ScenarioId: scenarioCId, ProfilePicture: hashC });
     }
-    await db.collection("Characters").insertMany([...charsA, ...charsB]);
+    await db.collection("Characters").insertMany([...charsA, ...charsB, ...charsC]);
 
     const channelsA = [new ObjectId(), new ObjectId()];
     const channelsB = [new ObjectId(), new ObjectId()];
+    const channelsC = [new ObjectId(), new ObjectId()];
 
     const channelsToInsert = [
       { _id: channelsA[0], ChannelName: "Algemeen A", ChannelDescription: "Hoofd channel scenario A", ScenarioId: scenarioAId },
       { _id: channelsA[1], ChannelName: "Onderzoek A", ChannelDescription: "Discussie en updates A", ScenarioId: scenarioAId },
       { _id: channelsB[0], ChannelName: "Algemeen B", ChannelDescription: "Hoofd channel scenario B", ScenarioId: scenarioBId },
       { _id: channelsB[1], ChannelName: "Crisis B", ChannelDescription: "Crisis updates B", ScenarioId: scenarioBId },
+      { _id: channelsC[0], ChannelName: "Algemeen C", ChannelDescription: "Hoofd channel scenario C", ScenarioId: scenarioCId },
+      { _id: channelsC[1], ChannelName: "Geheimen C", ChannelDescription: "Discussies over het geheim", ScenarioId: scenarioCId },
     ];
     await db.collection("Channels").insertMany(channelsToInsert);
 
     const chatsA = { main: new ObjectId(), side1: new ObjectId(), side2: new ObjectId() };
     const chatsB = { main: new ObjectId(), side1: new ObjectId(), side2: new ObjectId() };
+    const chatsC = { main: new ObjectId(), side1: new ObjectId(), side2: new ObjectId() };
 
     const chatPicA1 = await uploadRandomImage(BUCKET_CHATS);
     const chatPicA2 = await uploadRandomImage(BUCKET_CHATS);
     const chatPicB1 = await uploadRandomImage(BUCKET_CHATS);
     const chatPicB2 = await uploadRandomImage(BUCKET_CHATS);
+    const chatPicC1 = await uploadRandomImage(BUCKET_CHATS);
+    const chatPicC2 = await uploadRandomImage(BUCKET_CHATS);
 
     const chatsToInsert = [
       { _id: chatsA.main, Name: "Groepschat Verdwijning", ScenarioId: scenarioAId, ProfilePicture: chatPicA1 },
@@ -227,12 +241,20 @@ async function seedDatabase() {
       { _id: chatsB.main, Name: "Groepschat Blackout", ScenarioId: scenarioBId, ProfilePicture: chatPicB1 },
       { _id: chatsB.side1, Name: "Privé: Eva & Frank", ScenarioId: scenarioBId, ProfilePicture: chatPicB2 },
       { _id: chatsB.side2, Name: "Privé: Gina & Hugo", ScenarioId: scenarioBId, ProfilePicture: chatPicB2 },
+      { _id: chatsC.main, Name: "Groepschat Reünie", ScenarioId: scenarioCId, ProfilePicture: chatPicC1 },
+      { _id: chatsC.side1, Name: "Privé: Lena & Niels", ScenarioId: scenarioCId, ProfilePicture: chatPicC2 },
+      { _id: chatsC.side2, Name: "Privé: Sara & Thomas", ScenarioId: scenarioCId, ProfilePicture: chatPicC2 },
     ];
     await db.collection("Chats").insertMany(chatsToInsert);
 
     const start = utcDate(2026, 1, 2, 8, 0);
     const end = utcDate(2026, 1, 10, 20, 0);
     const climax = utcDate(2026, 1, 9, 9, 0);
+
+    // Scenario C: tijdlijn loopt van 10 t/m 20 mei 2026 — alles in het verleden.
+    const startC = utcDate(2026, 5, 10, 8, 0);
+    const endC   = utcDate(2026, 5, 20, 20, 0);
+    const climaxC = utcDate(2026, 5, 20, 9, 0);
 
     const mainTextsA = [
       "Een student komt niet opdagen na een feestje en vrienden maken zich zorgen.",
@@ -335,15 +357,50 @@ async function seedDatabase() {
       return out;
     }
 
+    const mainTextsC = [
+      "De reünie begint en iedereen doet alsof er niets aan de hand is.",
+      "Lena merkt dat Thomas haar vermijdt, al van bij aankomst.",
+      "Er wordt een oude foto gevonden die vragen oproept.",
+      "Niels begint te praten over 'die nacht' maar stopt abrupt.",
+      "Sara trekt Lena apart en fluistert iets onrustwekkends.",
+      "Een onbekend nummer stuurt een berichtje naar de groep.",
+      "Thomas ontkent alles maar zijn gezicht vertelt iets anders.",
+      "De wijn vloeit en de tongen beginnen los te komen.",
+      "Een schreeuw vanuit de tuin trekt ieders aandacht.",
+      "Het blijkt een valse alarm, maar de spanning is voelbaar.",
+      "Niels vindt iets in de kelder dat hij niet had verwacht.",
+      "Sara weigert te vertellen wat ze weet totdat iedereen aanwezig is.",
+      "Lena ontdekt een dagboek dat zeven jaar verborgen was.",
+      "De groep verzamelt zich in de woonkamer voor een confrontatie.",
+      "Thomas geeft eindelijk toe dat hij er die nacht bij was.",
+      "Een naam valt die niemand had verwacht te horen.",
+      "De vriendschappen komen onder zware druk te staan.",
+      "Niels breekt in tranen uit en vraagt om vergiffenis.",
+      "Sara onthult dat ze het geheim al jaren bewaart.",
+      "De waarheid komt langzaam maar zeker naar boven.",
+      "Iemand dreigt de kamer te verlaten als het gesprek doorgaat.",
+      "Lena stelt voor om samen een beslissing te nemen.",
+      "De groep weegt de consequenties van de waarheid af.",
+      "Thomas stuurt een bericht naar iemand buiten de groep.",
+      "Een auto stopt voor het huis — onverwacht bezoek.",
+      "Het bezoek brengt nieuwe informatie die alles verandert.",
+      "De groep beseft dat ze niet langer kunnen zwijgen.",
+      "Een gezamenlijk besluit wordt genomen na uren van debat.",
+      "De nacht eindigt met tranen, opluchting en gebroken stiltes.",
+      "Iedereen vertrekt met het gevoel dat niets meer hetzelfde zal zijn.",
+    ];
+
     const sideA1Texts = makeSideTexts(mainTextsA, ["Anna", "Bram"], 25);
     const sideA2Texts = makeSideTexts(mainTextsA, ["Celine", "David"], 25);
     const sideB1Texts = makeSideTexts(mainTextsB, ["Eva", "Frank"], 25);
     const sideB2Texts = makeSideTexts(mainTextsB, ["Gina", "Hugo"], 25);
+    const sideC1Texts = makeSideTexts(mainTextsC, ["Lena", "Niels"], 25);
+    const sideC2Texts = makeSideTexts(mainTextsC, ["Sara", "Thomas"], 25);
 
     const storyMessages = [];
 
-    const planForChat = (texts, chatId, characters, total) => {
-      const dates = distributeDates(total, start, end, climax, 0.6);
+    const planForChat = (texts, chatId, characters, total, s, e, cl) => {
+      const dates = distributeDates(total, s, e, cl, 0.6);
       for (let i = 0; i < total; i++) {
         const char = characters[i % characters.length];
         const timestamp = dates[i];
@@ -362,12 +419,15 @@ async function seedDatabase() {
       }
     };
 
-    planForChat(mainTextsA, chatsA.main, charsA, 50);
-    planForChat(sideA1Texts, chatsA.side1, [charsA[0], charsA[1]], 25);
-    planForChat(sideA2Texts, chatsA.side2, [charsA[2], charsA[3]], 25);
-    planForChat(mainTextsB, chatsB.main, charsB, 50);
-    planForChat(sideB1Texts, chatsB.side1, [charsB[0], charsB[1]], 25);
-    planForChat(sideB2Texts, chatsB.side2, [charsB[2], charsB[3]], 25);
+    planForChat(mainTextsA, chatsA.main, charsA, 50, start, end, climax);
+    planForChat(sideA1Texts, chatsA.side1, [charsA[0], charsA[1]], 25, start, end, climax);
+    planForChat(sideA2Texts, chatsA.side2, [charsA[2], charsA[3]], 25, start, end, climax);
+    planForChat(mainTextsB, chatsB.main, charsB, 50, start, end, climax);
+    planForChat(sideB1Texts, chatsB.side1, [charsB[0], charsB[1]], 25, start, end, climax);
+    planForChat(sideB2Texts, chatsB.side2, [charsB[2], charsB[3]], 25, start, end, climax);
+    planForChat(mainTextsC, chatsC.main, charsC, 50, startC, endC, climaxC);
+    planForChat(sideC1Texts, chatsC.side1, [charsC[0], charsC[1]], 25, startC, endC, climaxC);
+    planForChat(sideC2Texts, chatsC.side2, [charsC[2], charsC[3]], 25, startC, endC, climaxC);
 
     // upload some images for messages that requested them
     for (const msg of storyMessages) {
@@ -383,7 +443,7 @@ async function seedDatabase() {
     await db.collection("StoryMessages").insertMany(storyMessages);
 
     // Posts + Comments: observer ("fly-on-the-wall") posts and comments only — admin will not create posts or comments
-    const allChannels = [...channelsA, ...channelsB];
+    const allChannels = [...channelsA, ...channelsB, ...channelsC];
     const posts = [];
 
     function observerPostTemplate(scenario, channelType, username) {
@@ -392,11 +452,16 @@ async function seedDatabase() {
           return `Als buitenstaander valt op dat de vondst van de rugzak veel losse eindjes samenbrengt. De combinatie van tips en CCTV-fragmenten creëert een gelaagd beeld; interessant om te zien wie welke bron inbrengt.`;
         }
         return `Het verhaal leest bijna als een reconstructie: tips komen binnen, verwijzingen naar beelden, en de groepsdynamiek zelf geeft veel context. Als observator vraag ik me af welke bronnen het meest betrouwbaar zijn.`;
-      } else {
+      } else if (scenario === "B") {
         if (channelType === "Crisis") {
           return `Vanuit de marge is het indrukwekkend hoe burgers en hulpdiensten improviseren. Foto's van verlichte straten en oplaadpunten vertellen meer over veerkracht dan officiële statements soms doen.`;
         }
         return `De blackout-berichten tonen de typische patronen van een onverwachte ramp: eerst chaos, daarna snelle lokale coördinatie via informele netwerken. Het is leerzaam om dat proces van dichtbij te volgen.`;
+      } else {
+        if (channelType === "Geheimen") {
+          return `De manier waarop geheimen jarenlang bewaard kunnen blijven binnen een vriendengroep is fascinerend en beklemmend tegelijk. Wie draagt de meeste last — degene die weet, of degene die niet weet?`;
+        }
+        return `Een reünie als setting voor het onthullen van een oud geheim werkt precies omdat iedereen tegelijk aanwezig is. De sociale druk en de gedeelde herinneringen maken ontkenning bijna onmogelijk.`;
       }
     }
 
@@ -408,7 +473,10 @@ async function seedDatabase() {
       let scenario = "A";
       let channelType = "Algemeen";
       if (chStr === channelsA[1].toString()) { channelType = "Onderzoek"; scenario = "A"; }
+      if (chStr === channelsB[0].toString()) { channelType = "Algemeen"; scenario = "B"; }
       if (chStr === channelsB[1].toString()) { channelType = "Crisis"; scenario = "B"; }
+      if (chStr === channelsC[0].toString()) { channelType = "Algemeen"; scenario = "C"; }
+      if (chStr === channelsC[1].toString()) { channelType = "Geheimen"; scenario = "C"; }
 
       for (const u of nonAdminUsers) {
         const title = `Observatie — ${u.Username}`;
