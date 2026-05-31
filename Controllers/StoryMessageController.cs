@@ -28,12 +28,24 @@ public class StoryMessageController(
         if (msg?.FileContent is null || msg.FileContent.Length == 0)
             return;
 
+        var objectName = msg.FileContent;
+
+        try
+        {
+            var stat = await MinioUtils.StatObjectAsync(minioClient, BUCKET, objectName);
+            msg.FileContentType = stat.ContentType;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed reading file metadata for StoryMessage {Id}", msg.StoryMessageId);
+        }
+
         try
         {
             msg.FileContent = await MinioUtils.GetObjectUrlAsync(
                 minioClient,
                 BUCKET,
-                msg.FileContent
+                objectName
             );
         }
         catch (Exception ex)
@@ -64,6 +76,41 @@ public class StoryMessageController(
         await PopulateFileUrlAsync(msg);
 
         return Ok(msg);
+    }
+
+    /// <summary>
+    /// Streamt de bijlage van een bericht rechtstreeks door met het juiste Content-Type.
+    /// Hierdoor kan de frontend de media via een browser-bereikbare URL (deze API) tonen
+    /// in plaats van via een presigned MinIO-URL die enkel intern bereikbaar is.
+    /// </summary>
+    [HttpGet("{id:length(24)}/file")]
+    public async Task<IActionResult> GetFile(string id)
+    {
+        var msg = await storyMessageService.Get(id);
+
+        if (msg is null || string.IsNullOrEmpty(msg.FileContent))
+            return NotFound();
+
+        try
+        {
+            var stat = await MinioUtils.StatObjectAsync(minioClient, BUCKET, msg.FileContent);
+
+            var memoryStream = new MemoryStream();
+            await MinioUtils.GetObjectAsync(minioClient, BUCKET, msg.FileContent, memoryStream);
+            memoryStream.Position = 0;
+
+            var contentType = string.IsNullOrWhiteSpace(stat.ContentType)
+                ? "application/octet-stream"
+                : stat.ContentType;
+
+            // enableRangeProcessing zorgt dat video's gescrubt/gestreamd kunnen worden.
+            return File(memoryStream, contentType, enableRangeProcessing: true);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed streaming file for StoryMessage {Id}", id);
+            return StatusCode(StatusCodes.Status500InternalServerError);
+        }
     }
 
     [HttpPost]
