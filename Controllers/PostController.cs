@@ -9,12 +9,17 @@ namespace BackEnd.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Authorize]
-public class PostController(PostService postService) : ControllerBase
+public class PostController(PostService postService, UserTimeoutService userTimeoutService) : ControllerBase
 {
     [HttpPost]
     public async Task<ActionResult<Post>> Add(PostCreateRequest postCreateRequest)
     {
-        var userId = User.FindFirst("userid")?.Value;
+        var userId = User.FindFirst("userid")?.Value!;
+
+        var timeout = await userTimeoutService.GetActive(userId);
+        if (timeout != null)
+            return StatusCode(423, new { message = "Je hebt een actieve time-out.", endsAt = timeout.EndsAt });
+
         var createdPost = await postService.Add(postCreateRequest, userId);
         return Ok(createdPost);
     }
@@ -54,7 +59,12 @@ public class PostController(PostService postService) : ControllerBase
     [HttpPut("update")]
     public async Task<ActionResult<PostResponse>> Update(PostUpdateRequest postUpdateRequest)
     {
-        var userId = User.FindFirst("userid")?.Value;
+        var userId = User.FindFirst("userid")?.Value!;
+
+        var timeout = await userTimeoutService.GetActive(userId);
+        if (timeout != null)
+            return StatusCode(423, new { message = "Je hebt een actieve time-out.", endsAt = timeout.EndsAt });
+
         var updatedPost = await postService.Update(userId, postUpdateRequest);
         return Ok(updatedPost);
     }

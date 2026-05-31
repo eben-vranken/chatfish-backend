@@ -69,6 +69,7 @@ builder.Services.AddSingleton<TicketService>();
 builder.Services.AddSingleton<PushNotificationService>();
 builder.Services.AddSingleton<BackEnd.Services.WebSocketManager>();
 builder.Services.AddSingleton<WarningService>();
+builder.Services.AddSingleton<UserTimeoutService>();
 
 builder.Services.AddHostedService<StoryMessagePollingWorker>();
 
