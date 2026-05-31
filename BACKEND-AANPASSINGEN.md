@@ -24,6 +24,7 @@ doen om de gevraagde **frontend**-userstories te kunnen realiseren.
 | *(commit hash)* | 2026-05-31 | US-30 (bericht verbergen) | `IsHidden`-veld + hide-endpoint + filtering per rol |
 | *(commit hash)* | 2026-05-31 | US-31 (moderator waarschuwing) | `Warning`-model + endpoint + per-user WebSocket + push-notificatie |
 | *(commit hash)* | 2026-05-31 | US-32 (moderator time-out) | `UserTimeout`-model + endpoints + afdwinging in PostController |
+| *(commit hash)* | 2026-05-31 | US-33 (moderator ban) | `Ban`-model + endpoints + ban-check in PostController |
 
 ---
 
@@ -165,6 +166,32 @@ doen om de gevraagde **frontend**-userstories te kunnen realiseren.
   (`EndsAt > UtcNow`) en afdwinging van het posteerverbod zijn volledig server-side
   verantwoordelijkheden. De frontend kan niet zelf beslissen of iemand mag posten; dat
   is precies wat autorisatie en persistente state op de server regelen.
+
+## 9. `feat(ban): foyer-ban systeem voor moderators`
+
+- **Commit:** *(vul hash in na `git commit`)* — 2026-05-31
+- **Nodig voor:** US-33 (moderator kan gebruiker uitsluiten/bannen)
+- **Gekozen scope:** **foyer-specifiek** — de gebruiker is uitgesloten van alle foyer-routes
+  en kan niet posten/bewerken; inloggen blijft mogelijk. Admin kan de ban opheffen.
+- **Wat ontbrak:** Er was geen concept van een foyer-ban: geen model, geen endpoints om
+  een ban op te leggen, op te halen of op te heffen, en geen afdwinging in de
+  post-endpoints.
+- **Wat we toevoegden:**
+  - `Ban`-model (`BanId`, `UserId`, `IssuedById`, `Reason`, `BannedAt`, `IsActive`,
+    `LiftedAt?`, `LiftedById?`) in eigen MongoDB-collectie (`Bans`).
+  - `POST /api/Ban` — moderator/admin; vervangt een bestaande actieve ban door een nieuwe.
+  - `GET /api/Ban/my` — elke ingelogde gebruiker; 204 als er geen actieve ban is.
+    Gebruikt door de Angular `foyerGuard` om foyer-toegang te blokkeren.
+  - `GET /api/Ban` — admin only; lijst van alle actieve bans, gebruikt door de
+    moderator-view om per auteur de ban-status te tonen.
+  - `DELETE /api/Ban/{userId}` — admin only; markeert alle actieve bans van een
+    gebruiker als inactief (`IsActive = false`, `LiftedAt`, `LiftedById` ingevuld).
+  - `PostController.Add` en `PostController.Update` uitgebreid met een ban-check vóór
+    de bestaande timeout-check: een gebande gebruiker krijgt HTTP 403.
+- **Waarom backend-domein:** Persistente ban-records, rol-gebaseerde autorisatie
+  (wie mag bannen, wie mag opheffen), en server-side afdwinging van het posteerverbod
+  zijn volledig server-side verantwoordelijkheden. De frontend-guard blokkeert de UI,
+  maar de backend is de enige betrouwbare handhaver.
 
 ---
 

@@ -9,12 +9,15 @@ namespace BackEnd.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Authorize]
-public class PostController(PostService postService, UserTimeoutService userTimeoutService) : ControllerBase
+public class PostController(PostService postService, UserTimeoutService userTimeoutService, BanService banService) : ControllerBase
 {
     [HttpPost]
     public async Task<ActionResult<Post>> Add(PostCreateRequest postCreateRequest)
     {
         var userId = User.FindFirst("userid")?.Value!;
+
+        if (await banService.GetActive(userId) != null)
+            return Forbid();
 
         var timeout = await userTimeoutService.GetActive(userId);
         if (timeout != null)
@@ -60,6 +63,9 @@ public class PostController(PostService postService, UserTimeoutService userTime
     public async Task<ActionResult<PostResponse>> Update(PostUpdateRequest postUpdateRequest)
     {
         var userId = User.FindFirst("userid")?.Value!;
+
+        if (await banService.GetActive(userId) != null)
+            return Forbid();
 
         var timeout = await userTimeoutService.GetActive(userId);
         if (timeout != null)
