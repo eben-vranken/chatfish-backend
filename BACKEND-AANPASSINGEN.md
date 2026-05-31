@@ -22,6 +22,7 @@ doen om de gevraagde **frontend**-userstories te kunnen realiseren.
 | `36b41c8` | 2026-05-31 | US-24 (tijdlijn testen) | Scenario met verleden startdatum in seed |
 | *(commit hash)* | 2026-05-31 | US-29 (bericht verwijderen) | Soft-delete endpoint voor posts |
 | *(commit hash)* | 2026-05-31 | US-30 (bericht verbergen) | `IsHidden`-veld + hide-endpoint + filtering per rol |
+| *(commit hash)* | 2026-05-31 | US-31 (moderator waarschuwing) | `Warning`-model + endpoint + per-user WebSocket + push-notificatie |
 
 ---
 
@@ -110,6 +111,32 @@ doen om de gevraagde **frontend**-userstories te kunnen realiseren.
 - **Waarom backend-domein:** Rol-gebaseerde zichtbaarheidsfiltering en persistente auditgegevens
   (wie verborg, wanneer, waarom) zijn server-side verantwoordelijkheden. De frontend kan niet zelf
   beslissen welke berichten zichtbaar zijn — dat is precies wat autorisatie op de server regelt.
+
+## 7. `feat(warning): waarschuwingssysteem voor moderators`
+
+- **Commit:** *(vul hash in na `git commit`)* — 2026-05-31
+- **Nodig voor:** US-31 (moderator stuurt waarschuwing naar gebruiker)
+- **Wat ontbrak:** Er was geen concept van waarschuwingen: geen model, geen endpoint om een
+  waarschuwing op te slaan of op te halen, en geen manier om een specifieke gebruiker real-time
+  te bereiken via WebSocket (de bestaande `WebSocketManager` broadcastte alleen naar iedereen).
+- **Wat we toevoegden:**
+  - `Warning`-model (`WarningId`, `TargetUserId`, `IssuedById`, `Reason`, `IssuedAt`) opgeslagen
+    in een eigen MongoDB-collectie (`Warnings`).
+  - `POST /api/Warning` — alleen toegankelijk voor moderator/admin; slaat de waarschuwing op,
+    stuurt een real-time WebSocket-bericht naar de doelgebruiker en een browser-push-notificatie
+    als die gebruiker een actief push-abonnement heeft.
+  - `GET /api/Warning/my` — geeft alle waarschuwingen terug gericht aan de ingelogde gebruiker;
+    gebruikt door de frontend om gemiste waarschuwingen te tonen na een herverbinding.
+  - `GET /api/Warning/ws` — WebSocket-eindpunt waarop de frontend zich verbindt na inloggen;
+    bewaard per gebruiker zodat berichten gericht kunnen worden afgeleverd.
+  - `WebSocketManager` uitgebreid met een per-gebruiker woordenboek naast de bestaande
+    broadcast-lijst, zodat bestaande story-message-functionaliteit ongewijzigd blijft.
+  - `PushNotificationService` uitgebreid met `SendToUserAsync` om gericht (op userId) een
+    browser-push te sturen in plaats van naar alle abonnees.
+- **Waarom backend-domein:** Persistente logging van waarschuwingen, autorisatiecontrole
+  (alleen moderator/admin), en real-time aflevering aan een specifieke gebruiker (per-user
+  WebSocket-targeting en browser-push) zijn volledig server-side verantwoordelijkheden.
+  De frontend kan niet zelf beslissen wie een waarschuwing mag sturen of wie hem ontvangt.
 
 ---
 
