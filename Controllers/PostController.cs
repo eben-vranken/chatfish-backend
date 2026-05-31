@@ -76,4 +76,21 @@ public class PostController(PostService postService) : ControllerBase
         var archived = await postService.Archive(postId);
         return archived is null ? NotFound() : Ok(archived);
     }
+
+    /// <summary>
+    /// Verbergt een bericht voor gewone gebruikers. Alleen moderators en admins mogen dit.
+    /// Het bericht blijft zichtbaar in de moderatorweergave inclusief auditgegevens (wie, wanneer, waarom).
+    /// </summary>
+    [HttpPatch("{postId:length(24)}/hide")]
+    public async Task<ActionResult<PostResponse>> Hide(string postId, [FromBody] HidePostRequest request)
+    {
+        var userId = User.FindFirst("userid")?.Value;
+        var post = await postService.Get(postId, userId);
+
+        if (post is null) return NotFound();
+        if (!post.IsHideable) return Forbid();
+
+        var hidden = await postService.Hide(postId, userId, request.Reason);
+        return hidden is null ? NotFound() : Ok(hidden);
+    }
 }

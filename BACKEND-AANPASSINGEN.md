@@ -21,6 +21,7 @@ doen om de gevraagde **frontend**-userstories te kunnen realiseren.
 | `237bece` | 2026-05-31 | US-25 (media in theaterchat) | Bijlagen streamen via API |
 | `36b41c8` | 2026-05-31 | US-24 (tijdlijn testen) | Scenario met verleden startdatum in seed |
 | *(commit hash)* | 2026-05-31 | US-29 (bericht verwijderen) | Soft-delete endpoint voor posts |
+| *(commit hash)* | 2026-05-31 | US-30 (bericht verbergen) | `IsHidden`-veld + hide-endpoint + filtering per rol |
 
 ---
 
@@ -93,6 +94,22 @@ doen om de gevraagde **frontend**-userstories te kunnen realiseren.
 - **Waarom backend-domein:** Persistente `IsArchived`-state bijhouden en autorisatie
   controleren is server-werk. De frontend kan niet zelf beslissen of iemand een bericht
   mag archiveren.
+
+## 6. `feat(post): verberg-functie voor moderators`
+
+- **Commit:** *(vul hash in na `git commit`)* — 2026-05-31
+- **Nodig voor:** US-30 (moderator verbergt schadelijk bericht)
+- **Wat ontbrak:** Het `Post`-model had geen manier om een bericht moderator-specifiek te verbergen,
+  los van de auteur-gerichte soft-delete (`IsArchived`). Er was ook geen endpoint voor moderators
+  om berichten te verbergen, en `GetByChannelId` filtreerde niet op rol.
+- **Wat we toevoegden:**
+  - `IsHidden`, `HiddenById`, `HiddenAt`, `HiddenReason` op het `Post`-model (auditlog ingebakken).
+  - `PATCH /api/Post/{id}/hide` — toegankelijk voor moderator of admin, met optionele reden.
+  - `GetByChannelId` filtert verborgen berichten weg voor niet-moderators/admins.
+  - `PostResponse` bevat `IsHidden`, `HiddenAt`, `HiddenReason` en `IsHideable` (computed per rol).
+- **Waarom backend-domein:** Rol-gebaseerde zichtbaarheidsfiltering en persistente auditgegevens
+  (wie verborg, wanneer, waarom) zijn server-side verantwoordelijkheden. De frontend kan niet zelf
+  beslissen welke berichten zichtbaar zijn — dat is precies wat autorisatie op de server regelt.
 
 ---
 

@@ -13,4 +13,8 @@ public class PostResponse
     public bool IsArchived { get; set; }
     public bool IsEditable { get; set; }
     public bool IsDeletable { get; set; }
+    public bool IsHidden { get; set; }
+    public DateTime? HiddenAt { get; set; }
+    public string? HiddenReason { get; set; }
+    public bool IsHideable { get; set; }
 }
