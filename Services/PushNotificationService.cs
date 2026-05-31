@@ -56,6 +56,35 @@ public class PushNotificationService
         return await _subscriptionsCollection.Find(s => s.Endpoint == endpoint).FirstOrDefaultAsync();
     }
 
+    public async Task SendToUserAsync(string userId, string title, string body, string? url = null)
+    {
+        var subscriptions = await _subscriptionsCollection.Find(s => s.UserId == userId).ToListAsync();
+        if (subscriptions.Count == 0) return;
+
+        var expiredSubscriptions = new List<string>();
+        foreach (var sub in subscriptions)
+        {
+            try
+            {
+                var pushSubscription = new WebPush.PushSubscription(sub.Endpoint, sub.P256dh, sub.Auth);
+                var payload = System.Text.Json.JsonSerializer.Serialize(new { title, body, url });
+                await _webPushClient.SendNotificationAsync(pushSubscription, payload, _vapidDetails);
+            }
+            catch (WebPushException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Gone ||
+                                               ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                expiredSubscriptions.Add(sub.Endpoint);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[PushNotificationService] Error sending to user {userId}: {ex.Message}");
+            }
+        }
+
+        if (expiredSubscriptions.Count > 0)
+            await _subscriptionsCollection.DeleteManyAsync(s => expiredSubscriptions.Contains(s.Endpoint));
+    }
+
     public async Task SendToAllAsync(string title, string body, string? url = null)
     {
         var subscriptions = await _subscriptionsCollection.Find(_ => true).ToListAsync();
