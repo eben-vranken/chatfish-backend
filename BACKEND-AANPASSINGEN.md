@@ -1,5 +1,12 @@
 # Backend-aanpassingen
 
+> **Demo toneelstuk aanmaken**
+> Voer dit commando uit om een nieuw toneelstuk "Erfenis in het Donker" toe te voegen dat 10 seconden later start (berichten komen minuut per minuut binnen):
+> ```bash
+> cd seed && npm run demo
+> ```
+> Verwijdert geen bestaande data. Veilig om meerdere keren te runnen.
+
 Dit document houdt bij welke aanpassingen we aan de **geleverde backend**
 (`chatfish-backend`, oorspronkelijk geschreven door de lectoren) hebben moeten
 doen om de gevraagde **frontend**-userstories te kunnen realiseren.
