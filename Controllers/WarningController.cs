@@ -21,9 +21,8 @@ public class WarningController(WarningService warningService, WebSocketManager w
     public async Task<ActionResult<WarningResponse>> Create([FromBody] WarningCreateRequest request)
     {
         var userId = User.FindFirst("userid")?.Value;
-        var role = User.FindFirst("role")?.Value?.ToLower();
 
-        if (role != "moderator" && role != "admin")
+        if (!User.IsInRole("moderator") && !User.IsInRole("admin"))
             return Forbid();
 
         var warning = await warningService.CreateWarning(request.TargetUserId, userId!, request.Reason);
