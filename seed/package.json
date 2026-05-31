@@ -4,7 +4,8 @@
   "description": "MongoDB seed script voor Chatfish database met Nederlandse test data",
   "main": "seed-mongodb.js",
   "scripts": {
-    "seed": "node seed-mongodb.js"
+    "seed": "node seed-mongodb.js",
+    "demo": "node seed-demo-scenario.js"
   },
   "keywords": [
     "mongodb",
