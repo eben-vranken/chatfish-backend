@@ -1,5 +1,12 @@
 # Docker Compose Setup - Stappenplan
 
+> **Demo toneelstuk aanmaken**
+> Voer dit commando uit om een nieuw toneelstuk "Erfenis in het Donker" toe te voegen dat 10 seconden later start (berichten komen minuut per minuut binnen):
+> ```bash
+> cd seed && npm run demo
+> ```
+> Verwijdert geen bestaande data. Veilig om meerdere keren te runnen.
+
 Dit deel legt uit hoe je de Chatfish backend lokaal opstart met Docker Compose.
 
 ## Stap 1: Vereisten
