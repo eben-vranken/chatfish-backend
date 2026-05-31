@@ -11,6 +11,14 @@ public StoryMessage() {}
     public string? StoryMessageId { get; set; }
     public string? TextContent { get; set; }
     public string? FileContent { get; set; }
+
+    /// <summary>
+    /// MIME-type van de bijlage (bv. "image/png", "video/mp4"). Niet opgeslagen in
+    /// de database; wordt bij het ophalen ingevuld vanuit de MinIO-objectmetadata
+    /// zodat de frontend weet hoe de media gerenderd moet worden.
+    /// </summary>
+    [BsonIgnore]
+    public string? FileContentType { get; set; }
     public DateTime PlannedAt
     {
         get => plannedAt;
