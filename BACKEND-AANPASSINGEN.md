@@ -19,6 +19,7 @@ doen om de gevraagde **frontend**-userstories te kunnen realiseren.
 | `5290aa0` | 2026-05-29 | US-12 (detailpagina), US-21 (countdown) | Verkoopdetails op `Scenario` |
 | `d82585b` | 2026-05-29 | US-21 (wachtruimte-toegang) | Ticket-model + endpoints |
 | `237bece` | 2026-05-31 | US-25 (media in theaterchat) | Bijlagen streamen via API |
+|  | 2026-05-31 | US-24 (tijdlijn testen) | Scenario met verleden startdatum in seed |
 
 ---
 
@@ -60,6 +61,23 @@ doen om de gevraagde **frontend**-userstories te kunnen realiseren.
 - **Waarom backend-domein:** Een browser kan de interne objectstore niet
   bereiken; het bestand bereikbaar maken én het type bekendmaken is server-werk.
   Media *tonen* is frontend, media *leveren* is backend.
+
+## 4. `feat(seed): voeg scenario met verleden startdatum toe voor tijdlijn-tests`
+
+- **Commit:** *(nog te committen — vul hash in na `git commit`)* — 2026-05-31
+- **Nodig voor:** US-24 (theatercontent afspelen volgens tijdlijn)
+- **Wat ontbrak:** De twee geleverde scenario's hebben beide een `StartMoment` ver
+  in de toekomst (juni / juli 2026). Functionaliteit die een **reeds gestart**
+  toneelstuk vereist — tijdlijn-weergave, automatische navigatie bij start,
+  `Sent: true` story messages — kon daardoor niet getest worden.
+- **Wat we toevoegden:** Een derde scenario *"De Nacht van de Waarheid"*
+  (`StartMoment: 2026-05-20T20:00:00Z`, 11 dagen geleden) met een volledige
+  dataset: 4 characters, 3 chats, 100 story messages (alle `Sent: true`),
+  2 foyer-channels en seed-posts. Toegevoegd aan `seed/seed-mongodb.js` zodat
+  elke developer het met het bestaande seed-commando beschikbaar krijgt.
+- **Waarom backend-domein:** Testdata voor een tijdlijn-feature is
+  server-side state (MongoDB-documenten met correcte `PlannedAt`/`SentAt`
+  timestamps). Dit kan niet vanuit de frontend worden aangemaakt of gesimuleerd.
 
 ---
 
