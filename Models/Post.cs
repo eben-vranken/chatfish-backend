@@ -26,5 +26,14 @@ public class Post(string title, string authorId, DateTime createdAt, string chan
     public string Content { get; set; } = content;
 
     public bool IsArchived { get; set; } = false;
-    
+
+    public bool IsHidden { get; set; } = false;
+
+    [BsonRepresentation(BsonType.ObjectId)]
+    public string? HiddenById { get; set; } = null;
+
+    public DateTime? HiddenAt { get; set; } = null;
+
+    public string? HiddenReason { get; set; } = null;
+
 }

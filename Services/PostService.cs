@@ -42,6 +42,7 @@ public class PostService
 
         bool isOwner = userId != null && post.AuthorId == userId;
         bool isAdmin = requestingUser?.Role?.Equals("admin", StringComparison.OrdinalIgnoreCase) == true;
+        bool isModerator = requestingUser?.Role?.Equals("moderator", StringComparison.OrdinalIgnoreCase) == true;
 
         return new PostResponse
         {
@@ -55,7 +56,11 @@ public class PostService
             ChannelId = post.ChannelId,
             IsArchived = post.IsArchived,
             IsEditable = userId != null && post.AuthorId == userId,
-            IsDeletable = isOwner || isAdmin
+            IsDeletable = isOwner || isAdmin,
+            IsHidden = post.IsHidden,
+            HiddenAt = post.HiddenAt,
+            HiddenReason = post.HiddenReason,
+            IsHideable = (isModerator || isAdmin) && !post.IsHidden && !post.IsArchived
         };
     }
     private async Task<PostResponse> MapToDto(Post post, User requestingUser)
@@ -66,6 +71,7 @@ public class PostService
 
         bool isOwner = requestingUser != null && post.AuthorId == requestingUser.UserId;
         bool isAdmin = requestingUser != null && requestingUser?.Role?.Equals("admin", StringComparison.OrdinalIgnoreCase) == true;
+        bool isModerator = requestingUser != null && requestingUser?.Role?.Equals("moderator", StringComparison.OrdinalIgnoreCase) == true;
 
         return new PostResponse
         {
@@ -79,7 +85,11 @@ public class PostService
             ChannelId = post.ChannelId,
             IsArchived = post.IsArchived,
             IsEditable = isOwner,
-            IsDeletable = isOwner || isAdmin
+            IsDeletable = isOwner || isAdmin,
+            IsHidden = post.IsHidden,
+            HiddenAt = post.HiddenAt,
+            HiddenReason = post.HiddenReason,
+            IsHideable = (isModerator || isAdmin) && !post.IsHidden && !post.IsArchived
         };
     }
     private async Task<List<PostResponse>> MapToDtoList(IEnumerable<Post> posts, string userId)
@@ -175,10 +185,44 @@ public class PostService
     }
 
 
+    public async Task<PostResponse> Hide(string postId, string moderatorId, string? reason)
+    {
+        var filter = Builders<Post>.Filter.Eq(x => x.PostId, postId);
+        var update = Builders<Post>.Update
+            .Set(x => x.IsHidden, true)
+            .Set(x => x.HiddenById, moderatorId)
+            .Set(x => x.HiddenAt, DateTime.UtcNow)
+            .Set(x => x.HiddenReason, reason);
+
+        var result = await _postCollection.FindOneAndUpdateAsync(
+            filter,
+            update,
+            new FindOneAndUpdateOptions<Post> { ReturnDocument = ReturnDocument.After }
+        );
+
+        if (result == null) return null;
+
+        return await MapToDto(result, moderatorId);
+    }
+
     public async Task<List<PostResponse>> GetByChannelId(string channelId, string userId)
     {
         var posts = await _postCollection.Find(x => x.ChannelId == channelId).ToListAsync();
-        return await MapToDtoList(posts, userId);
+        var requestingUser = await _userService.GetById(userId);
+
+        bool isModerator = requestingUser?.Role?.Equals("moderator", StringComparison.OrdinalIgnoreCase) == true;
+        bool isAdmin = requestingUser?.Role?.Equals("admin", StringComparison.OrdinalIgnoreCase) == true;
+
+        if (!isModerator && !isAdmin)
+            posts = posts.Where(p => !p.IsHidden).ToList();
+
+        var list = new List<PostResponse>();
+        foreach (var post in posts)
+        {
+            var dto = await MapToDto(post, requestingUser);
+            if (dto != null) list.Add(dto);
+        }
+        return list;
     }
 
     public async Task<List<PostResponse>> GetPostsByNonArchivedChannelId(string channelId)
