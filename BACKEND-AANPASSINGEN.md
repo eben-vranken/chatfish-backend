@@ -19,7 +19,7 @@ doen om de gevraagde **frontend**-userstories te kunnen realiseren.
 | `5290aa0` | 2026-05-29 | US-12 (detailpagina), US-21 (countdown) | Verkoopdetails op `Scenario` |
 | `d82585b` | 2026-05-29 | US-21 (wachtruimte-toegang) | Ticket-model + endpoints |
 | `237bece` | 2026-05-31 | US-25 (media in theaterchat) | Bijlagen streamen via API |
-|  | 2026-05-31 | US-24 (tijdlijn testen) | Scenario met verleden startdatum in seed |
+| `36b41c8` | 2026-05-31 | US-24 (tijdlijn testen) | Scenario met verleden startdatum in seed |
 
 ---
 
