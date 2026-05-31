@@ -70,6 +70,7 @@ builder.Services.AddSingleton<PushNotificationService>();
 builder.Services.AddSingleton<BackEnd.Services.WebSocketManager>();
 builder.Services.AddSingleton<WarningService>();
 builder.Services.AddSingleton<UserTimeoutService>();
+builder.Services.AddSingleton<BanService>();
 
 builder.Services.AddHostedService<StoryMessagePollingWorker>();
 
