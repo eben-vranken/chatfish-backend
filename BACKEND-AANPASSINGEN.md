@@ -20,6 +20,7 @@ doen om de gevraagde **frontend**-userstories te kunnen realiseren.
 | `d82585b` | 2026-05-29 | US-21 (wachtruimte-toegang) | Ticket-model + endpoints |
 | `237bece` | 2026-05-31 | US-25 (media in theaterchat) | Bijlagen streamen via API |
 | `36b41c8` | 2026-05-31 | US-24 (tijdlijn testen) | Scenario met verleden startdatum in seed |
+| *(commit hash)* | 2026-05-31 | US-29 (bericht verwijderen) | Soft-delete endpoint voor posts |
 
 ---
 
@@ -78,6 +79,20 @@ doen om de gevraagde **frontend**-userstories te kunnen realiseren.
 - **Waarom backend-domein:** Testdata voor een tijdlijn-feature is
   server-side state (MongoDB-documenten met correcte `PlannedAt`/`SentAt`
   timestamps). Dit kan niet vanuit de frontend worden aangemaakt of gesimuleerd.
+
+## 5. `feat(post): soft-delete endpoint voor foyer-berichten`
+
+- **Commit:** *(vul hash in na `git commit`)* — 2026-05-31
+- **Nodig voor:** US-29 (bericht verwijderen door auteur)
+- **Wat ontbrak:** `PostService` had al een `Archive`-methode die `IsArchived = true` zet,
+  maar er was geen HTTP-endpoint om die te bereiken. De `DELETE`-endpoint doet een harde
+  verwijdering en biedt geen herstelpad.
+- **Wat we toevoegden:** `PATCH /api/Post/{id}/archive` — controleert of de aanvrager auteur
+  of admin is (via het bestaande `IsDeletable`-vlag), archiveert dan het bericht (soft-delete).
+  Het bericht blijft in de database zodat een admin het later kan herstellen (Epic 6).
+- **Waarom backend-domein:** Persistente `IsArchived`-state bijhouden en autorisatie
+  controleren is server-werk. De frontend kan niet zelf beslissen of iemand een bericht
+  mag archiveren.
 
 ---
 

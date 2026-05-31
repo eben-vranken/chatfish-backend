@@ -59,5 +59,21 @@ public class PostController(PostService postService) : ControllerBase
         return Ok(updatedPost);
     }
 
-    
+    /// <summary>
+    /// Soft-delete: markeert het bericht als gearchiveerd. Alleen de auteur of een admin
+    /// mag dit doen. Het bericht blijft in de database staan zodat een admin het later
+    /// kan herstellen (Epic 6).
+    /// </summary>
+    [HttpPatch("{postId:length(24)}/archive")]
+    public async Task<ActionResult<PostResponse>> Archive(string postId)
+    {
+        var userId = User.FindFirst("userid")?.Value;
+        var post = await postService.Get(postId, userId);
+
+        if (post is null) return NotFound();
+        if (!post.IsDeletable) return Forbid();
+
+        var archived = await postService.Archive(postId);
+        return archived is null ? NotFound() : Ok(archived);
+    }
 }
