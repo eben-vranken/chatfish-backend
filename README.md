@@ -64,6 +64,8 @@ docker compose exec chatfish-api bash /app/seed/seed.sh 'mongodb://chatfish-mong
 3. Typ `j` en druk op Enter om door te gaan
 4. Wacht tot het script klaar is (dit kan even duren)
 
+De API-container leest de seed-bestanden nu uit de workspace via bind mounts. Als je de seed wijzigt, hoef je dus niet meer eerst de image te herbuilden; opnieuw seeden volstaat, zolang de container is aangemaakt met de nieuwste `docker compose up -d`.
+
 **Let op**: Dit verwijdert alle bestaande data in de database!
 
 ### Test gebruikers

@@ -76,6 +76,10 @@ services:
       # - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx #[SetUpHTTPS]
     volumes:
       - ./appsettings.json:/app/appsettings.json:ro
+      # Mount seed files from the workspace so docker exec uses the latest version.
+      - ./seed/seed-mongodb.js:/app/seed/seed-mongodb.js:ro
+      - ./seed/seed.sh:/app/seed/seed.sh:ro
+      - ./seed/files:/app/seed/files:ro
       # - ~/.aspnet/https:/https:ro #[SetUpHTTPS]
     networks:
       - chatfish
